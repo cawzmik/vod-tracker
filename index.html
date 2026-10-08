@@ -50,8 +50,8 @@ a.brand { color: inherit; text-decoration: none; }
 .logo { width: 26px; height: 26px; flex: none; }
 /* The red ".LIVE" after the name. The dot sits up top and blinks like a recording light. */
 .brand-name { white-space: nowrap; }
-.brand-live { position: relative; margin-left: 9px; color: var(--red); }
-.brand-live::before { content: ""; position: absolute; left: -7px; top: 3px; width: 5px; height: 5px; border-radius: 50%; background: var(--red); animation: pulse 1.6s ease-in-out infinite; }
+.brand-live { position: relative; top: -.55em; margin-left: 8px; color: var(--red); font-size: .62em; letter-spacing: .03em; }
+.brand-live::before { content: ""; position: absolute; left: -6px; top: 4px; width: 4px; height: 4px; border-radius: 50%; background: var(--red); animation: pulse 1.6s ease-in-out infinite; }
 /* No room for the word on narrow screens, so only the red dot stays */
 @media (max-width: 620px) { .brand-live span { display: none; } }
 .status { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
