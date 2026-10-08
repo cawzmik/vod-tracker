@@ -66,6 +66,11 @@ a.btn { color: inherit; text-decoration: none; }
   .status { gap: 6px; }
   .brand { white-space: nowrap; }
 }
+/* The report label is long, so it drops to just the icon before the others do */
+@media (max-width: 900px) {
+  #reportBtn span { display: none; }
+  #reportBtn { width: 34px; padding: 0; justify-content: center; }
+}
 .spin svg { animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -170,7 +175,7 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
 .hiddenlist .row:last-child { border-bottom: 0; }
 .hiddenlist .kind { font-size: 11px; font-weight: 600; color: var(--muted); background: var(--surface-2); border-radius: 6px; padding: 2px 7px; margin-right: 8px; }
 
-/* Report a bug */
+/* Report a bug or send feedback */
 .report { width: min(460px, calc(100vw - 28px)); padding: 20px; border-radius: var(--radius); border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); box-shadow: 0 8px 30px rgba(16,16,24,.25); }
 .report::backdrop { background: rgba(0, 0, 0, .55); }
 .report h2 { margin: 0; font-size: 18px; letter-spacing: -.01em; }
@@ -230,9 +235,9 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
         <span>Refresh</span>
       </button>
-      <button class="btn" id="reportBtn" title="Report a bug">
+      <button class="btn" id="reportBtn" title="Report a bug or send feedback">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4"/><path d="M4 4h13l-2 4.5 2 4.5H4"/></svg>
-        <span>Report bug</span>
+        <span>Report bug / feedback</span>
       </button>
       <button class="btn" id="editBtn">Edit</button>
       <button class="btn icon" id="themeBtn" title="Switch light or dark mode">
@@ -320,10 +325,10 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
 <div class="toast" id="toast"></div>
 
 <dialog class="report" id="reportDialog">
-  <h2>Report a bug</h2>
-  <p>Say what went wrong and what you clicked before it happened. The page you're on is sent with it.</p>
+  <h2>Report a bug or send feedback</h2>
+  <p>For a bug, say what went wrong and what you clicked before it happened. Feedback and ideas go here too. The page you're on is sent with it.</p>
   <form id="reportForm">
-    <label class="field"><span>What went wrong?</span><textarea id="reportText" maxlength="1000" required></textarea></label>
+    <label class="field"><span>Your message</span><textarea id="reportText" maxlength="1000" required></textarea></label>
     <label class="field"><span>Your Discord or Twitch name (optional, if you want a reply)</span><input id="reportContact" maxlength="80" autocomplete="off"></label>
     <div class="err" id="reportErr" style="display:none"></div>
     <div class="actions">
@@ -339,7 +344,7 @@ const params = new URLSearchParams(location.search);
 const GIST = params.get("gist") || "c66de21bf81b169405f9e07a485d63cc";
 const REFRESH_MS = 2 * 60 * 1000;
 const TOKEN_KEY = "vodtracker-gist-token";
-// Bug reports go through a Cloudflare Worker, which passes them on to Discord.
+// Bug reports and feedback go through a Cloudflare Worker, which passes them on to Discord.
 // The Discord webhook itself is kept inside the Worker.
 const REPORT_URL = "https://gd-rewind-report.cloudflarerewind-bf2.workers.dev/";
 const PLAY_ICON = '<svg viewBox="0 0 10 10"><path d="M2 1l7 4-7 4z" fill="currentColor"/></svg>';
@@ -809,7 +814,7 @@ $("themeBtn").onclick = () => {
   try { localStorage.setItem("vodtracker-theme", light ? "light" : "dark"); } catch { }
 };
 
-// ---- report a bug
+// ---- report a bug or send feedback
 $("reportBtn").onclick = () => {
   $("reportErr").style.display = "none";
   $("reportDialog").showModal();
@@ -842,13 +847,13 @@ $("reportForm").onsubmit = async e => {
     if (res.ok) {
       $("reportText").value = "";
       $("reportDialog").close();
-      toast("Report sent, thanks");
+      toast("Sent, thanks");
     } else {
       const body = await res.json().catch(() => ({}));
-      fail(body.error || "Couldn't send the report. Try again in a minute.");
+      fail(body.error || "Couldn't send it. Try again in a minute.");
     }
   } catch {
-    fail("Couldn't send the report. Check your connection and try again.");
+    fail("Couldn't send it. Check your connection and try again.");
   }
   send.disabled = false;
   send.textContent = "Send";
