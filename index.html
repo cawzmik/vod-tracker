@@ -66,6 +66,14 @@ a.brand { color: inherit; text-decoration: none; }
 a.btn { color: inherit; text-decoration: none; }
 .btn.kofi { color: #ff5e5b; }
 .btn.kofi:hover { background: rgba(255, 94, 91, .1); border-color: transparent; }
+.kofi-wrap { position: relative; }
+.kofi-menu { position: absolute; top: calc(100% + 6px); right: 0; z-index: 6; min-width: 200px; padding: 6px; border-radius: 12px; border: 1px solid var(--border-strong); background: var(--surface); box-shadow: 0 8px 30px rgba(16,16,24,.25); }
+.kofi-menu[hidden] { display: none; }
+.kofi-head { padding: 4px 10px 6px; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+.kofi-menu a { display: flex; flex-direction: column; padding: 7px 10px; border-radius: 8px; color: var(--text); text-decoration: none; }
+.kofi-menu a:hover { background: var(--surface-2); }
+.kofi-menu a b { font-weight: 600; font-size: 14px; }
+.kofi-menu a span { font-size: 12px; color: var(--muted); }
 @media (max-width: 560px) {
   .btn.kofi span, #refresh span, #reportBtn span { display: none; }
   .btn.kofi, #refresh, #reportBtn { width: 34px; padding: 0; justify-content: center; }
@@ -241,10 +249,17 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
     <a class="brand" href="./" id="homeLink"><svg class="logo" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="58 0 48 48"><defs><linearGradient id="gdr" x1="81.82" y1="43" x2="81.82" y2="5" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#8b80ff"/><stop offset="1" stop-color="#8b80ff" stop-opacity=".8"/></linearGradient></defs><path fill="url(#gdr)" d="M 81.423828,5.0117188 C 78.35723,5.1023105 75.288064,5.9332797 72.5,7.5429688 65.065161,11.835475 61.424519,20.621578 63.646484,28.914062 65.868449,37.206547 73.414989,42.996095 82,42.996094 c 8.584391,0 16.128983,-5.788557 18.35156,-14.080078 0.47436,-1.746445 0.4473,-3.752165 -0.568357,-5.398438 -1.017842,-1.649821 -2.726504,-2.566607 -4.498047,-3.03125 C 92.755454,19.822835 89.74438,19.816642 86,20.279297 V 17.072266 L 74,24 86,30.927734 v -4.566406 c 3.7612,-0.467757 6.452026,-0.414333 7.763672,-0.07031 0.661728,0.173559 0.870413,0.342841 0.912109,0.380859 0.0074,0.06401 0.0018,0.246972 -0.115234,0.675781 l -0.0039,0.01367 C 93.030031,33.058714 87.898371,36.996094 82,36.996094 76.101633,36.996095 70.969969,33.058714 69.443359,27.361328 67.916748,21.66394 70.391861,15.687467 75.5,12.738281 80.608138,9.7890979 87.020629,10.63391 91.191406,14.804688 L 95.435547,10.5625 C 92.400286,7.5272397 88.524104,5.6986274 84.478516,5.1660156 83.467119,5.0328627 82.446027,4.9815215 81.423828,5.0117188 Z M 94.666016,26.642578 h 0.002 v 0.002 h 0.002 v 0.002 c 0.0013,0.0035 0.0026,0.01083 0.0039,0.01953 -0.0034,-0.006 -0.0048,-0.01374 -0.0059,-0.01758 l -0.002,-0.002 v -0.002 z"/></svg><span class="brand-name">GD Rewind<span class="brand-live"><span>LIVE</span></span></span></a>
     <div class="status">
       <span class="when" id="updated"></span>
-      <a class="btn kofi" href="https://ko-fi.com/cawzmik" target="_blank" rel="noopener" title="Support me on Ko-fi">
+      <div class="kofi-wrap">
+      <button class="btn kofi" id="kofiBtn" title="Support us on Ko-fi" aria-haspopup="true" aria-expanded="false">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1a4 4 0 0 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><path d="M10 11.5c-.8-.9-2.4-.4-2.4.9 0 1.2 2.4 2.6 2.4 2.6s2.4-1.4 2.4-2.6c0-1.3-1.6-1.8-2.4-.9z" fill="currentColor" stroke="none"/></svg>
-        <span>Support me</span>
-      </a>
+        <span>Support us</span>
+      </button>
+      <div class="kofi-menu" id="kofiMenu" hidden>
+        <div class="kofi-head">Developers</div>
+        <a href="https://ko-fi.com/cawzmik" target="_blank" rel="noopener"><b>cawzmik</b><span>ko-fi.com/cawzmik</span></a>
+        <a href="https://ko-fi.com/megeli" target="_blank" rel="noopener"><b>megeli</b><span>ko-fi.com/megeli</span></a>
+      </div>
+      </div>
       <button class="btn" id="refresh" title="Refresh">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
         <span>Refresh</span>
@@ -862,6 +877,16 @@ $("startSel").onchange = e => { startFilter = e.target.value; renderRows(); };
 $("levelSel").onchange = e => { levelKey = e.target.value; sessionId = null; startFilter = "all"; render(); };
 $("sessionSel").onchange = e => { sessionId = Number(e.target.value); startFilter = "all"; showSession(); };
 $("refresh").onclick = load;
+
+// ---- Support us menu (one Ko-fi link per developer)
+function setKofiMenu(open) {
+  $("kofiMenu").hidden = !open;
+  $("kofiBtn").setAttribute("aria-expanded", open);
+}
+$("kofiBtn").onclick = e => { e.stopPropagation(); setKofiMenu($("kofiMenu").hidden); };
+document.addEventListener("click", e => { if (!e.target.closest(".kofi-wrap")) setKofiMenu(false); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") setKofiMenu(false); });
+$("kofiMenu").onclick = () => setKofiMenu(false);
 
 $("themeBtn").onclick = () => {
   const light = document.documentElement.dataset.theme !== "light";
