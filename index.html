@@ -1078,5 +1078,7 @@ load();
 setInterval(() => { if (!document.hidden && (useWorker() || Date.now() >= pausedUntil)) load(); }, REFRESH_MS);
 setInterval(tickUpdated, 15000);
 </script>
+<!-- Cloudflare Web Analytics: counts visits, no cookies. Numbers are in the Cloudflare dashboard under Web Analytics. -->
+<script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "a7e90a0d727b4892892520e3d5e4424d"}'></script>
 </body>
 </html>
