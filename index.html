@@ -625,9 +625,11 @@ function render() {
     return;
   }
 
-  const mine = levels.filter(l => l.streamer === streamer);
+  // Levels with the most attempts (across every uploaded session) come first
+  const attempts = l => l.sessions.reduce((n, s) => n + s.runs.length, 0);
+  const mine = levels.filter(l => l.streamer === streamer).sort((a, b) => attempts(b) - attempts(a) || b.updated - a.updated);
   if (!mine.some(l => l.key === levelKey)) levelKey = mine[0].key;
-  fillSelect($("levelSel"), mine.map(l => [l.key, l.level]), levelKey);
+  fillSelect($("levelSel"), mine.map(l => [l.key, `${l.level} · ${attempts(l)} attempts`]), levelKey);
 
   const lvl = currentLevel();
   const sessions = [...lvl.sessions].sort((a, b) => b.id - a.id);
