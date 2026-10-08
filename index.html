@@ -33,6 +33,7 @@
   --accent: #8d80ff; --accent-soft: #221f3d; --accent-text: #b2a9ff;
   --green: #4ade80; --green-soft: #13261a; --blue: #7ea6ff; --blue-soft: #151f36;
   --red: #ff6369; --red-soft: #2e1517;
+  --orange: #ffad5a; --orange-soft: #2e2214;
   --shadow: none;
   --radius: 14px;
 }
@@ -43,6 +44,7 @@
   --accent: #6a5af9; --accent-soft: #efedff; --accent-text: #5144e0;
   --green: #17a34a; --green-soft: #e7f6ec; --blue: #2f6fe4; --blue-soft: #e9f0fe;
   --red: #e5484d; --red-soft: #fdecec;
+  --orange: #c2610c; --orange-soft: #fdf1e3;
   --shadow: 0 1px 2px rgba(16, 16, 24, .04), 0 1px 1px rgba(16, 16, 24, .02);
 }
 .btn.icon { width: 34px; padding: 0; justify-content: center; }
@@ -182,6 +184,9 @@ td.num { width: 56px; color: var(--faint); font-size: 13px; }
 .run.prac { color: var(--blue); }
 .tag { font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 999px; background: var(--blue-soft); color: var(--blue); }
 .tag.win { background: var(--green-soft); color: var(--green); }
+.tag.nc { background: var(--orange-soft); color: var(--orange); }
+.run.nc { color: var(--orange); }
+.bar.nc i { background: var(--orange); }
 .bar { position: relative; height: 4px; border-radius: 4px; background: var(--surface-2); margin-top: 7px; max-width: 260px; }
 .bar i { position: absolute; top: 0; bottom: 0; border-radius: 4px; background: var(--accent); }
 .bar.done i { background: var(--green); }
@@ -447,8 +452,9 @@ const hoursLeft = name => Math.max(1, Math.ceil((lastPlayed(name) + GUEST_SECOND
 
 function toRuns(s) {
   return s.runs.map(a => {
-    const [n, st, e, f, t, d, vi, o] = a;
-    return { n, s: st, e, p: !!(f & 1), c: !!(f & 2), t, d, o,
+    const [n, st, e, f, t, d, vi, o, acc, hits] = a;
+    // nc: noclip run (got hit without dying), with noclip accuracy and deaths
+    return { n, s: st, e, p: !!(f & 1), c: !!(f & 2), nc: !!(f & 4), acc, hits, t, d, o,
       u: vi >= 0 && s.vods[vi] ? `https://www.twitch.tv/videos/${s.vods[vi]}?t=${twitchT(o)}` : null };
   });
 }
@@ -779,7 +785,8 @@ const label = r => D.platformer ? (r.c ? `Beat it in ${clock(r.d)}` : `Died afte
 const selKey = r => `${sessionId}:${r.n}`;
 
 function renderStats() {
-  const runs = D.runs;
+  // Noclip runs don't count toward real stats
+  const runs = D.runs.filter(r => !r.nc);
   const linked = runs.filter(r => r.u).length;
   let stats;
   if (D.platformer) {
@@ -815,6 +822,7 @@ function renderFilters() {
   const types = D.platformer
     ? [["all", "All"], ["win", "Completions"]]
     : [["all", "All"], ["normal", "Normal"], ["practice", "Practice"], ["win", "Completions"]];
+  if (D.runs.some(r => r.nc)) types.push(["noclip", "Noclip"]);
   if (!types.some(([k]) => k === typeFilter)) typeFilter = "all";
   $("types").innerHTML = "";
   for (const [k, n] of types) {
@@ -831,6 +839,9 @@ function shown() {
   const list = D.runs.filter(r => {
     if (!D.platformer && !r.c && (r.e - r.s) < min) return false;
     if (startFilter !== "all" && r.s !== Number(startFilter)) return false;
+    // Noclip runs only show under their own tab
+    if (typeFilter === "noclip") return r.nc;
+    if (r.nc) return false;
     if (typeFilter === "normal") return !r.p;
     if (typeFilter === "practice") return r.p;
     if (typeFilter === "win") return r.c;
@@ -854,7 +865,7 @@ function renderRows() {
     const tr = document.createElement("tr");
     const on = selected.has(selKey(r));
     if (on) tr.className = "sel";
-    const cls = r.c ? "done" : r.p ? "prac" : "";
+    const cls = r.nc ? "nc" : r.c ? "done" : r.p ? "prac" : "";
     tr.innerHTML = `<td class="chk"><input type="checkbox"${on ? " checked" : ""}></td>
       <td class="num">#${r.n}</td>
       <td><div class="run ${cls}"><span class="lbl"></span></div>${D.platformer ? "" : `<div class="bar ${cls}"><i style="left:${r.s}%;width:${Math.max(1, r.e - r.s)}%"></i></div>`}</td>
@@ -862,7 +873,8 @@ function renderRows() {
       <td class="act">${r.u ? `<a class="watch" target="_blank" rel="noopener">${PLAY_ICON}Watch</a>` : '<span class="nolink">No VOD</span>'}${editMode ? `<button class="delrun" title="Delete this run">${TRASH_ICON}</button>` : ""}</td>`;
     tr.querySelector(".lbl").textContent = label(r);
     const run = tr.querySelector(".run");
-    if (r.p) run.insertAdjacentHTML("beforeend", '<span class="tag">practice</span>');
+    if (r.nc) run.insertAdjacentHTML("beforeend", `<span class="tag nc">${noclipText(r)}</span>`);
+    else if (r.p) run.insertAdjacentHTML("beforeend", '<span class="tag">practice</span>');
     if (r.c) run.insertAdjacentHTML("beforeend", '<span class="tag win">complete</span>');
     if (r.u) tr.querySelector("a").href = r.u;
     if (editMode) tr.querySelector(".delrun").onclick = () => deleteRun(r);
@@ -883,7 +895,8 @@ function count() {
   $("dock").style.display = sel ? "" : "none";
 }
 
-const lines = runs => runs.map(r => `#${r.n} ${label(r)}${r.p ? " (practice)" : ""} ${r.u || "(no VOD)"}`).join("\n");
+const noclipText = r => `noclip ${Number(r.acc ?? 0).toFixed(1)}% · ${r.hits ?? 0} ${r.hits === 1 ? "death" : "deaths"}`;
+const lines = runs => runs.map(r => `#${r.n} ${label(r)}${r.nc ? ` (${noclipText(r)})` : r.p ? " (practice)" : ""} ${r.u || "(no VOD)"}`).join("\n");
 
 function toast(msg) {
   const t = $("toast"); t.textContent = msg; t.classList.add("show");
