@@ -344,6 +344,10 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
 const params = new URLSearchParams(location.search);
 const GIST = params.get("gist") || "c66de21bf81b169405f9e07a485d63cc";
 const REFRESH_MS = 2 * 60 * 1000;
+// The Worker serves a copy of the gist that's at most a minute old, so viewers
+// never hit GitHub's per-network rate limit. Edit mode (with a token) and any
+// Worker failure go straight to GitHub instead.
+const DATA_URL = params.get("gist") ? "" : "https://gd-rewind-api.cawzmikhint.workers.dev/data";
 const GUEST_SECONDS = 24 * 3600;
 const TOKEN_KEY = "vodtracker-gist-token";
 const TRASH_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>';
@@ -418,18 +422,31 @@ function noteRateLimit(res) {
   return true;
 }
 
+const useWorker = () => !token && !!DATA_URL;
+
 async function load() {
-  if (Date.now() < pausedUntil) {
+  // A GitHub rate limit only matters when we can't use the Worker copy
+  if (!useWorker() && Date.now() < pausedUntil) {
     if (loaded) toast(`Updates paused until ${clockTime(pausedUntil)}`);
     return;
   }
   $("refresh").classList.add("spin");
   try {
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const res = await fetch(`https://api.github.com/gists/${GIST}`, { cache: "no-store", headers });
-    if (noteRateLimit(res)) throw new Error(pauseMessage());
-    if (!res.ok) throw new Error(res.status === 404 ? "Couldn't find the data for this page." : `GitHub had a problem loading the data (error ${res.status}). Try Refresh in a minute.`);
-    const gist = await res.json();
+    let gist = null;
+    if (useWorker()) {
+      try {
+        const res = await fetch(DATA_URL, { cache: "no-store", signal: AbortSignal.timeout(8000) });
+        if (res.ok) { gist = await res.json(); pausedUntil = 0; }
+      } catch { }
+    }
+    if (!gist) {
+      if (Date.now() < pausedUntil) throw new Error(pauseMessage());
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(`https://api.github.com/gists/${GIST}`, { cache: "no-store", headers });
+      if (noteRateLimit(res)) throw new Error(pauseMessage());
+      if (!res.ok) throw new Error(res.status === 404 ? "Couldn't find the data for this page." : `GitHub had a problem loading the data (error ${res.status}). Try Refresh in a minute.`);
+      gist = await res.json();
+    }
     const out = [];
     files = {};
     hidden = { streamers: [], levels: [], sessions: [], runs: [], shown: [] };
@@ -1058,7 +1075,7 @@ function renderHidden() {
 
 render();
 load();
-setInterval(() => { if (!document.hidden && Date.now() >= pausedUntil) load(); }, REFRESH_MS);
+setInterval(() => { if (!document.hidden && (useWorker() || Date.now() >= pausedUntil)) load(); }, REFRESH_MS);
 setInterval(tickUpdated, 15000);
 </script>
 </body>
