@@ -7,7 +7,7 @@
 </script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>VOD Tracker</title>
+<title>GD Rewind</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -206,7 +206,7 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
 <body>
 <div class="wrap">
   <header class="topbar">
-    <a class="brand" href="./" id="homeLink"><span class="logo"></span>VOD Tracker</a>
+    <a class="brand" href="./" id="homeLink"><span class="logo"></span>GD Rewind</a>
     <div class="status">
       <span class="when" id="updated"></span>
       <a class="btn kofi" href="https://ko-fi.com/cawzmik" target="_blank" rel="noopener" title="Support me on Ko-fi">
@@ -240,7 +240,7 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
 
   <section class="home" id="home" style="display:none">
     <div class="hero-top">
-      <h1>VOD Tracker</h1>
+      <h1>GD Rewind</h1>
       <button class="btn share" title="Copy a link to this page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>Share</button>
     </div>
     <p class="lead">A death tracker for Geometry Dash streamers. Every attempt on a level is saved with the percent it started and ended at, like 34%-71%, and linked to the moment it started in the streamer's Twitch VOD.</p>
@@ -539,7 +539,7 @@ function setView(home) {
 
 function renderHome() {
   setView(true);
-  document.title = "VOD Tracker";
+  document.title = "GD Rewind";
   const grid = $("homeGrid");
   grid.innerHTML = "";
   const note = html => { const d = document.createElement("div"); d.className = "notice"; d.innerHTML = html; grid.appendChild(d); };
@@ -575,7 +575,7 @@ function renderHome() {
 function render() {
   if (!streamer) return renderHome();
   setView(false);
-  document.title = `${streamer} · VOD Tracker`;
+  document.title = `${streamer} · GD Rewind`;
   if (!loaded) {
     $("pickers").style.display = "none";
     if (loadError) showNotice(loadError);
@@ -587,7 +587,7 @@ function render() {
   renderStreamers(names);
   if (!names.includes(streamer)) {
     $("pickers").style.display = "none";
-    showNotice(`Nothing uploaded for "${streamer}" yet. Pick someone above, or click VOD Tracker to go back home.`);
+    showNotice(`Nothing uploaded for "${streamer}" yet. Pick someone above, or click GD Rewind to go back home.`);
     return;
   }
 
