@@ -387,9 +387,40 @@ const isLive = l => nowS() - Math.max(...l.sessions.map(s => s.last)) < 10 * 60;
 function toRuns(s) {
   return s.runs.map(a => {
     const [n, st, e, f, t, d, vi, o] = a;
-    return { n, s: st, e, p: !!(f & 1), c: !!(f & 2), t, d, o,
+    return { n, s: st, e, p: !!(f & 1), c: !!(f & 2), t, d, o, v: vi >= 0 ? s.vods[vi] : null,
       u: vi >= 0 && s.vods[vi] ? `https://www.twitch.tv/videos/${s.vods[vi]}?t=${twitchT(o)}` : null };
   });
+}
+
+// ---- deleted VODs
+// Twitch deletes VODs after a while, and streamers can delete them too. The
+// Worker asks Twitch which of a session's VODs are gone, so those runs stop
+// showing a Watch link. If the check fails, links are left as they are.
+const VOD_RECHECK_MS = 20 * 60 * 1000;
+const goneVods = new Set();
+const vodChecked = new Map(); // vod id -> when it was last checked
+const vodGone = r => !!r.u && goneVods.has(r.v);
+const link = r => vodGone(r) ? null : r.u;
+
+async function checkVods(ids) {
+  const now = Date.now();
+  const ask = [...new Set(ids)].filter(id => /^\d+$/.test(id) && now - (vodChecked.get(id) || 0) > VOD_RECHECK_MS).slice(0, 100);
+  if (!ask.length) return;
+  for (const id of ask) vodChecked.set(id, now);
+  try {
+    const res = await fetch(`${REPORT_URL}vods?ids=${ask.join(",")}`);
+    if (!res.ok) throw new Error(res.status);
+    const gone = new Set((await res.json()).gone || []);
+    let changed = false;
+    for (const id of ask) {
+      if (gone.has(id) !== goneVods.has(id)) changed = true;
+      if (gone.has(id)) goneVods.add(id); else goneVods.delete(id);
+    }
+    if (changed && D) { renderStats(); renderRows(); }
+  } catch {
+    // Try again in 5 minutes
+    for (const id of ask) vodChecked.set(id, now - VOD_RECHECK_MS + 5 * 60 * 1000);
+  }
 }
 
 // ---- loading
@@ -671,6 +702,7 @@ function showSession() {
   renderStats();
   renderFilters();
   renderRows();
+  checkVods(s.vods || []);
   tickUpdated();
 }
 
@@ -679,7 +711,7 @@ const selKey = r => `${sessionId}:${r.n}`;
 
 function renderStats() {
   const runs = D.runs;
-  const linked = runs.filter(r => r.u).length;
+  const linked = runs.filter(r => link(r)).length;
   let stats;
   if (D.platformer) {
     stats = [["Attempts", runs.length], ["Completions", runs.filter(r => r.c).length],
@@ -758,13 +790,13 @@ function renderRows() {
       <td class="num">#${r.n}</td>
       <td><div class="run ${cls}"><span class="lbl"></span></div>${D.platformer ? "" : `<div class="bar ${cls}"><i style="left:${r.s}%;width:${Math.max(1, r.e - r.s)}%"></i></div>`}</td>
       <td class="len">${clock(r.d)}</td>
-      <td class="time">${r.u ? clock(r.o) : '<span class="nolink">-</span>'}</td>
-      <td class="act">${r.u ? `<a class="watch" target="_blank" rel="noopener">${PLAY_ICON}Watch</a>` : '<span class="nolink">No VOD</span>'}</td>`;
+      <td class="time">${link(r) ? clock(r.o) : '<span class="nolink">-</span>'}</td>
+      <td class="act">${link(r) ? `<a class="watch" target="_blank" rel="noopener">${PLAY_ICON}Watch</a>` : `<span class="nolink">${vodGone(r) ? "VOD deleted" : "No VOD"}</span>`}</td>`;
     tr.querySelector(".lbl").textContent = label(r);
     const run = tr.querySelector(".run");
     if (r.p) run.insertAdjacentHTML("beforeend", '<span class="tag">practice</span>');
     if (r.c) run.insertAdjacentHTML("beforeend", '<span class="tag win">complete</span>');
-    if (r.u) tr.querySelector("a").href = r.u;
+    if (link(r)) tr.querySelector("a").href = r.u;
     tr.querySelector("input").onchange = e => {
       e.target.checked ? selected.add(selKey(r)) : selected.delete(selKey(r));
       tr.className = e.target.checked ? "sel" : "";
@@ -782,7 +814,7 @@ function count() {
   $("dock").style.display = sel ? "" : "none";
 }
 
-const lines = runs => runs.map(r => `#${r.n} ${label(r)}${r.p ? " (practice)" : ""} ${r.u || "(no VOD)"}`).join("\n");
+const lines = runs => runs.map(r => `#${r.n} ${label(r)}${r.p ? " (practice)" : ""} ${link(r) || (vodGone(r) ? "(VOD deleted)" : "(no VOD)")}`).join("\n");
 
 function toast(msg) {
   const t = $("toast"); t.textContent = msg; t.classList.add("show");
