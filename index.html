@@ -8,6 +8,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>GD Rewind</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='2' y='2' width='60' height='60' rx='15' fill='%236a44a8' stroke='%232a1a55' stroke-width='4'/%3E%3Cpolygon points='31,13 31,39 12,26' fill='%23fff'/%3E%3Cpolygon points='52,13 52,39 33,26' fill='%23fff'/%3E%3Crect x='12' y='46' width='40' height='6' rx='3' fill='%232a1a55'/%3E%3Crect x='12' y='46' width='25' height='6' rx='3' fill='%237af07a'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -46,8 +47,7 @@ button, select, input, textarea { font: inherit; color: inherit; }
 .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 22px 0 18px; }
 a.brand { color: inherit; text-decoration: none; }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -.01em; font-size: 16px; }
-.logo { width: 26px; height: 26px; border-radius: 8px; background: var(--accent); display: grid; place-items: center; }
-.logo::after { content: ""; border-left: 8px solid #fff; border-top: 5px solid transparent; border-bottom: 5px solid transparent; margin-left: 2px; }
+.logo { width: 26px; height: 26px; flex: none; }
 .status { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
 .btn { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; font-size: 13px; font-weight: 500; box-shadow: var(--shadow); transition: background .15s, border-color .15s; }
 .btn:hover { border-color: var(--border-strong); background: var(--surface-2); }
@@ -224,7 +224,7 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
 <body>
 <div class="wrap">
   <header class="topbar">
-    <a class="brand" href="./" id="homeLink"><span class="logo"></span>GD Rewind</a>
+    <a class="brand" href="./" id="homeLink"><svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect x="2" y="2" width="60" height="60" rx="15" fill="#6a44a8" stroke="#2a1a55" stroke-width="4"/><polygon points="31,13 31,39 12,26" fill="#fff"/><polygon points="52,13 52,39 33,26" fill="#fff"/><rect x="12" y="46" width="40" height="6" rx="3" fill="#2a1a55"/><rect x="12" y="46" width="25" height="6" rx="3" fill="#7af07a"/></svg>GD Rewind</a>
     <div class="status">
       <span class="when" id="updated"></span>
       <a class="btn kofi" href="https://ko-fi.com/cawzmik" target="_blank" rel="noopener" title="Support me on Ko-fi">
