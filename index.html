@@ -173,6 +173,10 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
 .hiddenlist { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 6px 14px; margin: -8px 0 18px; }
 .hiddenlist .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
 .hiddenlist .row:last-child { border-bottom: 0; }
+.hiddenlist .note { font-size: 13px; color: var(--muted); padding: 9px 0; border-bottom: 1px solid var(--border); }
+.hiddenlist .addrow { display: flex; gap: 8px; padding: 10px 0; }
+.hiddenlist .addrow input { flex: 1; min-width: 0; height: 34px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg); padding: 0 10px; font-size: 14px; }
+.hiddenlist .kind.on { color: var(--green); background: var(--green-soft); }
 .hiddenlist .kind { font-size: 11px; font-weight: 600; color: var(--muted); background: var(--surface-2); border-radius: 6px; padding: 2px 7px; margin-right: 8px; }
 
 /* Report a bug or send feedback */
@@ -255,9 +259,11 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
       <button class="btn danger" id="delStreamer">Delete streamer</button>
     </span>
     <span class="spacer"></span>
+    <button class="btn" id="showShown">Shown streamers</button>
     <button class="btn" id="showHidden">Deleted items</button>
     <button class="btn" id="logout">Forget token</button>
   </div>
+  <div class="hiddenlist" id="shownList" style="display:none"></div>
   <div class="hiddenlist" id="hiddenList" style="display:none"></div>
 
   <section class="home" id="home" style="display:none">
@@ -365,7 +371,9 @@ let files = {};    // every parsed file in the gist, by filename
 // Deleting only hides things: the mod re-uploads its own data, so a plain
 // delete would come back the next time that person plays. "hidden.json" lists
 // what's been deleted, and anything in it can be restored.
-let hidden = { streamers: [], levels: [], sessions: [] };
+// "shown" is the whitelist: when it has names, only those streamers appear
+let hidden = { streamers: [], levels: [], sessions: [], shown: [] };
+let allStreamers = [];  // everyone with data, before the whitelist
 let lastFetch = 0;
 let loaded = false;      // got data from GitHub at least once
 let pausedUntil = 0;     // GitHub asked us to wait until this time (ms)
@@ -426,7 +434,7 @@ async function load() {
     const gist = await res.json();
     const out = [];
     files = {};
-    hidden = { streamers: [], levels: [], sessions: [] };
+    hidden = { streamers: [], levels: [], sessions: [], shown: [] };
     for (const file of Object.values(gist.files)) {
       if (!file.filename.endsWith(".json")) continue;
       let text = file.content;
@@ -446,14 +454,18 @@ async function load() {
       } catch { }
     }
     for (const l of out) l.sessions = (l.sessions || []).filter(s => !hidden.sessions.includes(sessionTag(l, s)));
-    levels = out
-      .filter(l => l.sessions.length && !hidden.streamers.includes(l.streamer) && !hidden.levels.includes(levelTag(l)))
+    const visible = out.filter(l => l.sessions.length && !hidden.streamers.includes(l.streamer) && !hidden.levels.includes(levelTag(l)));
+    allStreamers = [...new Set(visible.map(l => l.streamer))].sort();
+    const shown = (hidden.shown || []).map(n => String(n).toLowerCase());
+    levels = visible
+      .filter(l => !shown.length || shown.includes(l.streamer))
       .sort((a, b) => b.updated - a.updated);
     lastFetch = Date.now();
     loaded = true;
     loadError = "";
     render();
     if (!$("hiddenList").style.display) renderHidden();
+    if (!$("shownList").style.display) renderShown();
   } catch (err) {
     const msg = String(err.message || err).replace(/^TypeError: /, "");
     loadError = /fetch/i.test(msg) ? "Couldn't reach GitHub. Check your connection and hit Refresh." : msg;
@@ -865,7 +877,7 @@ function setEditMode(on) {
   $("editBtn").classList.toggle("on", on);
   $("editBtn").textContent = on ? "Done" : "Edit";
   $("editbar").style.display = on ? "" : "none";
-  if (!on) $("hiddenList").style.display = "none";
+  if (!on) { $("hiddenList").style.display = "none"; $("shownList").style.display = "none"; }
 }
 
 $("editBtn").onclick = () => {
@@ -947,6 +959,73 @@ $("showHidden").onclick = () => {
   box.style.display = box.style.display ? "" : "none";
   renderHidden();
 };
+
+$("showShown").onclick = () => {
+  const box = $("shownList");
+  box.style.display = box.style.display ? "" : "none";
+  renderShown();
+};
+
+function setShown(list) {
+  hidden.shown = [...new Set(list.map(n => n.trim().toLowerCase()).filter(Boolean))];
+  saveHidden();
+}
+
+// The whitelist: who appears on the site. Empty means everyone.
+function renderShown() {
+  const box = $("shownList");
+  const shown = hidden.shown || [];
+  box.innerHTML = "";
+  const note = document.createElement("div");
+  note.className = "note";
+  note.textContent = shown.length
+    ? "Only the streamers marked Shown appear on the site. Remove everyone to show all streamers again."
+    : "Everyone who uploads appears on the site right now. Add a name to only show the streamers on this list.";
+  box.appendChild(note);
+
+  const row = (kind, on, name, btnText, onClick) => {
+    const r = document.createElement("div");
+    r.className = "row";
+    r.innerHTML = '<span><span class="kind"></span><span class="what"></span></span><button class="btn"></button>';
+    r.querySelector(".kind").textContent = kind;
+    if (on) r.querySelector(".kind").classList.add("on");
+    r.querySelector(".what").textContent = name;
+    r.querySelector("button").textContent = btnText;
+    r.querySelector("button").onclick = onClick;
+    box.appendChild(r);
+  };
+  for (const name of shown) {
+    row("Shown", true, name, "Remove", () => setShown(shown.filter(n => n !== name)));
+  }
+  if (shown.length) {
+    for (const name of allStreamers.filter(n => !shown.includes(n))) {
+      row("Not shown", false, name, "Show", () => setShown([...shown, name]));
+    }
+  }
+
+  const add = document.createElement("div");
+  add.className = "addrow";
+  add.innerHTML = '<input placeholder="Twitch name" autocomplete="off" spellcheck="false"><button class="btn primary">Add</button>';
+  const input = add.querySelector("input");
+  const submit = () => {
+    const name = input.value.trim().toLowerCase();
+    if (!name) return;
+    if (!shown.length && allStreamers.some(n => n !== name) &&
+        !confirm(`Once the list has a name, only listed streamers appear. Everyone else (${allStreamers.filter(n => n !== name).join(", ")}) gets hidden from the site until you add them.\n\nAdd ${name}?`)) return;
+    setShown([...shown, name]);
+  };
+  add.querySelector("button").onclick = submit;
+  input.onkeydown = e => { if (e.key === "Enter") submit(); };
+  box.appendChild(add);
+
+  if (!shown.length && allStreamers.length) {
+    const all = document.createElement("div");
+    all.className = "addrow";
+    all.innerHTML = '<button class="btn">Add everyone on the site now</button>';
+    all.querySelector("button").onclick = () => setShown(allStreamers);
+    box.appendChild(all);
+  }
+}
 
 // Level name for a key, if any copy of its data is still in the gist
 const levelName = (who, key) => (Object.values(files).find(d => d.streamer === who && d.key === key) || {}).level || key;
