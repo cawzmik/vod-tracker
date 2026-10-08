@@ -44,6 +44,7 @@ button, select, input { font: inherit; color: inherit; }
 
 /* Top bar */
 .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 22px 0 18px; }
+a.brand { color: inherit; text-decoration: none; }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -.01em; font-size: 16px; }
 .logo { width: 26px; height: 26px; border-radius: 8px; background: var(--accent); display: grid; place-items: center; }
 .logo::after { content: ""; border-left: 8px solid #fff; border-top: 5px solid transparent; border-bottom: 5px solid transparent; margin-left: 2px; }
@@ -89,7 +90,7 @@ a.btn { color: inherit; text-decoration: none; }
 
 /* Hero */
 .hero h1 { margin: 0; font-size: 30px; line-height: 1.15; letter-spacing: -.02em; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.live { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--red); background: var(--red-soft); padding: 4px 10px; border-radius: 999px; letter-spacing: .02em; }
+.live { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--red); background: var(--red-soft); padding: 4px 10px; border-radius: 999px; letter-spacing: .02em; }
 .live::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--red); animation: pulse 1.6s ease-in-out infinite; }
 @keyframes pulse { 50% { opacity: .35; } }
 .sub { color: var(--muted); margin-top: 6px; }
@@ -97,6 +98,30 @@ a.btn { color: inherit; text-decoration: none; }
 .stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); }
 .stat span { display: block; font-size: 12px; color: var(--muted); font-weight: 500; }
 .stat b { display: block; font-size: 22px; font-weight: 650; letter-spacing: -.01em; margin-top: 2px; }
+
+.hero-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.hero-top .btn { flex: none; margin-top: 2px; }
+
+/* Home */
+.home h1 { margin: 6px 0 0; font-size: 30px; line-height: 1.15; letter-spacing: -.02em; }
+.lead { color: var(--muted); font-size: 16px; max-width: 640px; margin: 10px 0 0; }
+.steps { list-style: none; padding: 0; margin: 24px 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; counter-reset: step; }
+.steps li { counter-increment: step; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; box-shadow: var(--shadow); font-size: 14px; color: var(--muted); }
+.steps li::before { content: counter(step); display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-text); font-size: 12px; font-weight: 700; margin-bottom: 10px; }
+.steps li b { display: block; color: var(--text); font-weight: 600; margin-bottom: 2px; }
+.beta { display: flex; gap: 10px; align-items: flex-start; margin-top: 14px; padding: 12px 16px; border-radius: var(--radius); background: var(--accent-soft); color: var(--text); font-size: 14px; }
+.beta .tag { background: var(--accent); color: #fff; flex: none; margin-top: 1px; }
+.section { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin: 34px 0 12px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+.scard { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); cursor: pointer; text-align: left; box-shadow: var(--shadow); transition: border-color .15s, background .15s; }
+.scard:hover { border-color: var(--accent); }
+.scard .avatar { width: 44px; height: 44px; font-size: 16px; }
+.scard .name { font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.scard .meta { font-size: 13px; color: var(--muted); }
+.scard .go { margin-left: auto; color: var(--faint); }
+.scard:hover .go { color: var(--accent-text); }
+.scard .live { padding: 2px 8px; font-size: 11px; }
+.grid .notice { grid-column: 1 / -1; padding: 32px 20px; }
 
 /* Card + toolbar */
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
@@ -152,6 +177,8 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
 /* Dock */
 .dock { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 16px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); box-shadow: 0 8px 30px rgba(16,16,24,.12); z-index: 5; }
 .dock .count { color: var(--muted); font-size: 13px; margin-right: 6px; white-space: nowrap; }
+.dock .btn.plain { border-color: transparent; box-shadow: none; background: none; color: var(--muted); }
+.dock .btn.plain:hover { color: var(--text); background: var(--surface-2); }
 .toast { position: fixed; top: 18px; left: 50%; transform: translate(-50%, -10px); background: var(--text); color: var(--bg); padding: 9px 16px; border-radius: 10px; font-size: 14px; font-weight: 500; opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none; z-index: 10; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
@@ -169,15 +196,17 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
   td.act { width: auto; }
   .watch { padding: 0 10px; }
   .bar { max-width: 140px; }
-  .dock { left: 12px; right: 12px; transform: none; justify-content: flex-end; }
-  .dock .count { display: none; }
+  .dock { left: 12px; right: 12px; transform: none; }
+  .dock .count { margin-right: auto; }
+  .steps { grid-template-columns: 1fr; }
+  .home h1 { font-size: 26px; }
 }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="topbar">
-    <div class="brand"><span class="logo"></span>VOD Tracker</div>
+    <a class="brand" href="./" id="homeLink"><span class="logo"></span>VOD Tracker</a>
     <div class="status">
       <span class="when" id="updated"></span>
       <a class="btn kofi" href="https://ko-fi.com/cawzmik" target="_blank" rel="noopener" title="Support me on Ko-fi">
@@ -198,14 +227,32 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
 
   <div class="editbar" id="editbar" style="display:none">
     <span class="label">Edit mode</span>
-    <button class="btn danger" id="delSession">Delete session</button>
-    <button class="btn danger" id="delLevel">Delete level</button>
-    <button class="btn danger" id="delStreamer">Delete streamer</button>
+    <span id="delBtns">
+      <button class="btn danger" id="delSession">Delete session</button>
+      <button class="btn danger" id="delLevel">Delete level</button>
+      <button class="btn danger" id="delStreamer">Delete streamer</button>
+    </span>
     <span class="spacer"></span>
     <button class="btn" id="showHidden">Deleted items</button>
     <button class="btn" id="logout">Forget token</button>
   </div>
   <div class="hiddenlist" id="hiddenList" style="display:none"></div>
+
+  <section class="home" id="home" style="display:none">
+    <div class="hero-top">
+      <h1>VOD Tracker</h1>
+      <button class="btn share" title="Copy a link to this page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>Share</button>
+    </div>
+    <p class="lead">A death tracker for Geometry Dash streamers. Every attempt on a level is saved with the percent it started and ended at, like 34%-71%, and linked to the moment it started in the streamer's Twitch VOD.</p>
+    <ol class="steps">
+      <li><b>Pick a streamer</b>Choose someone from the list below.</li>
+      <li><b>Pick a level and session</b>A session is one sitting on a level. You can sort runs, filter by start position, and hide short attempts.</li>
+      <li><b>Click Watch</b>The VOD opens right where that attempt started.</li>
+    </ol>
+    <div class="beta"><span class="tag">Beta</span><span>This site is in beta. Right now cawzmik is only adding a few streamers. A version in the same format that anyone can use is planned for the future.</span></div>
+    <h2 class="section">Streamers</h2>
+    <div class="grid" id="homeGrid"></div>
+  </section>
 
   <nav class="streamers" id="streamers"></nav>
 
@@ -216,8 +263,13 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
 
   <div id="main" style="display:none">
     <section class="hero">
-      <h1 id="title"></h1>
-      <div class="sub" id="sub"></div>
+      <div class="hero-top">
+        <div>
+          <h1 id="title"></h1>
+          <div class="sub" id="sub"></div>
+        </div>
+        <button class="btn share" title="Copy a link to this streamer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>Share</button>
+      </div>
       <div class="stats" id="stats"></div>
     </section>
 
@@ -231,6 +283,7 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
         <div class="select small" id="startWrap"><select id="startSel"></select></div>
         <div class="seg" id="types"></div>
         <label class="minlen" id="minWrap">At least <input type="number" id="min" min="0" max="100" value="10"> % long</label>
+        <button class="btn" id="copyShown" title="Copy every run in this list">Copy list</button>
       </div>
       <table>
         <thead><tr><th></th><th>#</th><th>Run</th><th class="len">Length</th><th>VOD time</th><th></th></tr></thead>
@@ -244,7 +297,7 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
 
 <div class="dock" id="dock" style="display:none">
   <span class="count" id="count"></span>
-  <button class="btn" id="copyShown">Copy shown</button>
+  <button class="btn plain" id="clearSel">Clear</button>
   <button class="btn primary" id="copySel">Copy selected</button>
 </div>
 <div class="toast" id="toast"></div>
@@ -275,6 +328,9 @@ let files = {};    // every parsed file in the gist, by filename
 // what's been deleted, and anything in it can be restored.
 let hidden = { streamers: [], levels: [], sessions: [] };
 let lastFetch = 0;
+let loaded = false;      // got data from GitHub at least once
+let pausedUntil = 0;     // GitHub asked us to wait until this time (ms)
+let loadError = "";
 let streamer = (params.get("streamer") || "").toLowerCase() || null;
 let levelKey = null, sessionId = null;
 let typeFilter = "all", startFilter = "all";
@@ -298,12 +354,36 @@ function toRuns(s) {
 }
 
 // ---- loading
+const clockTime = ms => new Date(ms).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+const pauseMessage = () => `GitHub limits how often one network can load this page, so updates are paused until ${clockTime(pausedUntil)}. The page will pick back up on its own.`;
+
+// GitHub allows about 60 loads an hour per network without a login. When
+// that runs out, wait until it resets instead of showing a raw error.
+function noteRateLimit(res) {
+  if (res.status !== 403 && res.status !== 429) return false;
+  const remaining = res.headers.get("x-ratelimit-remaining");
+  const retryAfter = Number(res.headers.get("retry-after"));
+  const reset = Number(res.headers.get("x-ratelimit-reset"));
+  if (res.status === 403 && remaining !== null && remaining !== "0" && !retryAfter) return false;
+  if (retryAfter) pausedUntil = Date.now() + retryAfter * 1000;
+  else if (reset) pausedUntil = reset * 1000 + 2000;
+  else pausedUntil = Date.now() + 5 * 60 * 1000;
+  clearTimeout(noteRateLimit.timer);
+  noteRateLimit.timer = setTimeout(load, Math.max(5000, pausedUntil - Date.now()));
+  return true;
+}
+
 async function load() {
+  if (Date.now() < pausedUntil) {
+    if (loaded) toast(`Updates paused until ${clockTime(pausedUntil)}`);
+    return;
+  }
   $("refresh").classList.add("spin");
   try {
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const res = await fetch(`https://api.github.com/gists/${GIST}`, { cache: "no-store", headers });
-    if (!res.ok) throw new Error(res.status === 404 ? "Gist not found, check the gist ID" : res.status === 403 ? "GitHub rate limit hit, try again in a few minutes" : `GitHub error ${res.status}`);
+    if (noteRateLimit(res)) throw new Error(pauseMessage());
+    if (!res.ok) throw new Error(res.status === 404 ? "Couldn't find the data for this page." : `GitHub had a problem loading the data (error ${res.status}). Try Refresh in a minute.`);
     const gist = await res.json();
     const out = [];
     files = {};
@@ -331,11 +411,15 @@ async function load() {
       .filter(l => l.sessions.length && !hidden.streamers.includes(l.streamer) && !hidden.levels.includes(levelTag(l)))
       .sort((a, b) => b.updated - a.updated);
     lastFetch = Date.now();
+    loaded = true;
+    loadError = "";
     render();
     if (!$("hiddenList").style.display) renderHidden();
   } catch (err) {
-    if (!levels.length) showNotice(String(err.message || err));
-    else toast(String(err.message || err));
+    const msg = String(err.message || err).replace(/^TypeError: /, "");
+    loadError = /fetch/i.test(msg) ? "Couldn't reach GitHub. Check your connection and hit Refresh." : msg;
+    if (!loaded) render();
+    else toast(Date.now() < pausedUntil ? `Updates paused until ${clockTime(pausedUntil)}` : loadError);
   }
   $("refresh").classList.remove("spin");
   tickUpdated();
@@ -349,6 +433,7 @@ function showNotice(msg) {
 }
 
 function tickUpdated() {
+  if (loaded && Date.now() < pausedUntil) { $("updated").textContent = `Paused until ${clockTime(pausedUntil)}`; return; }
   if (!lastFetch) return;
   const l = currentLevel();
   $("updated").textContent = l ? `Synced ${ago(nowS() - l.updated)}` : `Checked ${ago(Math.floor((Date.now() - lastFetch) / 1000))}`;
@@ -394,32 +479,117 @@ function renderStreamers(names) {
     if (levels.some(l => l.streamer === name && isLive(l))) {
       const dot = document.createElement("span"); dot.className = "dot"; dot.title = "Playing now"; b.appendChild(dot);
     }
-    b.onclick = () => {
-      if (name === streamer) return;
-      streamer = name; levelKey = null; sessionId = null; startFilter = "all";
-      // Keep the address shareable: ?streamer=name opens straight to this person
-      const p = new URLSearchParams(location.search); p.set("streamer", name);
-      history.replaceState(null, "", "?" + p.toString());
-      render();
-    };
+    b.onclick = () => { if (name !== streamer) go(name); };
     nav.appendChild(b);
   }
 }
 
 // ---- main render
-function render() {
-  if (!levels.length) { $("streamers").innerHTML = ""; $("pickers").style.display = "none"; showNotice("No sessions uploaded yet. They show up here about a minute after someone plays."); return; }
+// ---- navigation. ?streamer=name opens straight to that person, no streamer is the home page.
+function pageUrl(name) {
+  const p = new URLSearchParams();
+  if (params.get("gist")) p.set("gist", params.get("gist"));
+  if (name) p.set("streamer", name);
+  const q = p.toString();
+  return location.origin + location.pathname + (q ? "?" + q : "");
+}
 
-  const names = [...new Set(levels.map(l => l.streamer))];
-  if (!names.includes(streamer)) {
-    if (streamer && params.get("streamer") === streamer) {
-      renderStreamers(names); $("pickers").style.display = "none";
-      showNotice(`Nothing uploaded for "${streamer}" yet.`);
-      return;
-    }
-    streamer = names[0];
+function go(name) {
+  streamer = name || null; levelKey = null; sessionId = null; startFilter = "all";
+  history.pushState(null, "", pageUrl(streamer));
+  render();
+  window.scrollTo(0, 0);
+}
+
+window.addEventListener("popstate", () => {
+  streamer = (new URLSearchParams(location.search).get("streamer") || "").toLowerCase() || null;
+  levelKey = null; sessionId = null; startFilter = "all";
+  render();
+});
+
+$("homeLink").onclick = e => {
+  if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+  e.preventDefault();
+  if (streamer) go(null);
+};
+
+async function share() {
+  const url = pageUrl(streamer);
+  if (navigator.share && matchMedia("(pointer: coarse)").matches) {
+    try { await navigator.share({ title: document.title, url }); return; } catch (err) { if (err.name === "AbortError") return; }
   }
+  await copy(url, "Link copied");
+}
+document.querySelectorAll(".share").forEach(b => b.onclick = share);
+
+const streamerNames = () => [...new Set(levels.map(l => l.streamer))];
+
+function setView(home) {
+  $("home").style.display = home ? "" : "none";
+  $("streamers").style.display = home ? "none" : "";
+  $("delBtns").style.display = home ? "none" : "";
+  if (home) {
+    $("pickers").style.display = "none";
+    $("main").style.display = "none";
+    $("notice").style.display = "none";
+    $("dock").style.display = "none";
+    D = null;
+  }
+}
+
+function renderHome() {
+  setView(true);
+  document.title = "VOD Tracker";
+  const grid = $("homeGrid");
+  grid.innerHTML = "";
+  const note = html => { const d = document.createElement("div"); d.className = "notice"; d.innerHTML = html; grid.appendChild(d); };
+  if (!loaded) {
+    if (loadError) { note(""); grid.lastChild.textContent = loadError; }
+    else note('<div class="skel"></div><div class="skel" style="max-width:220px"></div>');
+    return;
+  }
+  const names = streamerNames();
+  if (!names.length) return note("No streamers yet. They show up here about a minute after someone plays with the mod.");
+
+  const info = names.map(name => {
+    const mine = levels.filter(l => l.streamer === name);
+    return { name, levels: mine.length, last: Math.max(...mine.map(l => Math.max(...l.sessions.map(s => s.last)))), live: mine.some(isLive) };
+  }).sort((a, b) => (b.live - a.live) || (b.last - a.last));
+
+  for (const it of info) {
+    const b = document.createElement("button");
+    b.className = "scard";
+    b.appendChild(avatarEl(it.name));
+    const text = document.createElement("div");
+    text.innerHTML = '<div class="name"></div><div class="meta"></div>';
+    text.querySelector(".name").textContent = it.name;
+    if (it.live) text.querySelector(".name").insertAdjacentHTML("beforeend", '<span class="live">Playing now</span>');
+    text.querySelector(".meta").textContent = `${it.levels} ${it.levels === 1 ? "level" : "levels"} · played ${ago(nowS() - it.last)}`;
+    b.appendChild(text);
+    b.insertAdjacentHTML("beforeend", '<svg class="go" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>');
+    b.onclick = () => go(it.name);
+    grid.appendChild(b);
+  }
+}
+
+function render() {
+  if (!streamer) return renderHome();
+  setView(false);
+  document.title = `${streamer} · VOD Tracker`;
+  if (!loaded) {
+    $("pickers").style.display = "none";
+    if (loadError) showNotice(loadError);
+    else { $("notice").innerHTML = '<div class="skel"></div><div class="skel" style="max-width:220px"></div>'; $("notice").style.display = ""; }
+    return;
+  }
+
+  const names = streamerNames();
   renderStreamers(names);
+  if (!names.includes(streamer)) {
+    $("pickers").style.display = "none";
+    showNotice(`Nothing uploaded for "${streamer}" yet. Pick someone above, or click VOD Tracker to go back home.`);
+    return;
+  }
 
   const mine = levels.filter(l => l.streamer === streamer);
   if (!mine.some(l => l.key === levelKey)) levelKey = mine[0].key;
@@ -450,12 +620,10 @@ function showSession() {
   D = { level: lvl.level, platformer: lvl.platformer, started: s.started, last: s.last, runs: toRuns(s) };
   $("notice").style.display = "none";
   $("main").style.display = "";
-  $("dock").style.display = "";
 
   const live = nowS() - s.last < 10 * 60;
   $("title").textContent = D.level;
   if (live) $("title").insertAdjacentHTML("beforeend", '<span class="live">Playing now</span>');
-  document.title = `${D.level} · ${streamer} · VOD Tracker`;
   const date = new Date(D.started * 1000).toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
   $("sub").textContent = `${streamer} · ${date} · ${dur(D.last - D.started)} session`;
 
@@ -563,13 +731,14 @@ function renderRows() {
     };
     tb.appendChild(tr);
   }
-  count(list.length);
+  count();
 }
 
-function count(n) {
-  if (n !== undefined) count.shown = n;
+// The copy bar only shows up once something is checked
+function count() {
   const sel = D ? D.runs.filter(r => selected.has(selKey(r))).length : 0;
-  $("count").textContent = `${count.shown || 0} shown · ${sel} selected`;
+  $("count").textContent = `${sel} selected`;
+  $("dock").style.display = sel ? "" : "none";
 }
 
 const lines = runs => runs.map(r => `#${r.n} ${label(r)}${r.p ? " (practice)" : ""} ${r.u || "(no VOD)"}`).join("\n");
@@ -579,16 +748,17 @@ function toast(msg) {
   clearTimeout(toast.timer); toast.timer = setTimeout(() => t.classList.remove("show"), 1800);
 }
 
-async function copy(text) {
+async function copy(text, done = "Copied to clipboard") {
   if (!text) return toast("Nothing to copy");
   try { await navigator.clipboard.writeText(text); }
   catch { const t = document.createElement("textarea"); t.value = text; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); }
-  toast("Copied to clipboard");
+  toast(done);
 }
 
 // ---- controls
 $("copyShown").onclick = () => D && copy(lines(shown()));
 $("copySel").onclick = () => D && copy(lines(D.runs.filter(r => selected.has(selKey(r)))));
+$("clearSel").onclick = () => { if (!D) return; for (const r of D.runs) selected.delete(selKey(r)); renderRows(); };
 $("sort").onchange = renderRows;
 $("min").oninput = renderRows;
 $("startSel").onchange = e => { startFilter = e.target.value; renderRows(); };
@@ -682,6 +852,7 @@ $("delStreamer").onclick = () => {
   for (const d of theirs) changes[d.filename] = null;
   levelKey = null;
   streamer = null;
+  history.replaceState(null, "", pageUrl(null));
   saveHidden(changes);
 };
 
@@ -719,8 +890,9 @@ function renderHidden() {
   }
 }
 
+render();
 load();
-setInterval(() => { if (!document.hidden) load(); }, REFRESH_MS);
+setInterval(() => { if (!document.hidden && Date.now() >= pausedUntil) load(); }, REFRESH_MS);
 setInterval(tickUpdated, 15000);
 </script>
 </body>
