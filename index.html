@@ -159,7 +159,7 @@ td.num { width: 56px; color: var(--faint); font-size: 13px; }
 .bar i { position: absolute; top: 0; bottom: 0; border-radius: 4px; background: var(--accent); }
 .bar.done i { background: var(--green); }
 .bar.prac i { background: var(--blue); }
-td.len, td.time { color: var(--muted); font-size: 14px; width: 110px; }
+td.time { color: var(--muted); font-size: 14px; width: 110px; }
 td.act { width: 110px; text-align: right; white-space: nowrap; }
 .watch { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 9px; background: var(--accent-soft); color: var(--accent-text); font-weight: 600; font-size: 13px; text-decoration: none; transition: background .15s, color .15s; }
 .watch:hover { background: var(--accent); color: #fff; }
@@ -212,7 +212,6 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
 @media (max-width: 720px) {
   .pickers { grid-template-columns: 1fr; }
   .stats { grid-template-columns: 1fr 1fr; }
-  td.len, th.len { display: none; }
   .minlen { margin-left: 0; }
   .hero h1 { font-size: 24px; }
   .status .when { display: none; }
@@ -324,7 +323,7 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
         <button class="btn" id="copyShown" title="Copy every run in this list">Copy list</button>
       </div>
       <table>
-        <thead><tr><th></th><th>#</th><th>Run</th><th class="len">Length</th><th>VOD time</th><th></th></tr></thead>
+        <thead><tr><th></th><th>#</th><th>Run</th><th>VOD time</th><th></th></tr></thead>
         <tbody id="rows"></tbody>
       </table>
     </section>
@@ -798,7 +797,7 @@ function renderRows() {
   const tb = $("rows");
   tb.innerHTML = "";
   if (!list.length) {
-    tb.innerHTML = `<tr><td colspan="6" class="empty">No runs match these filters</td></tr>`;
+    tb.innerHTML = `<tr><td colspan="5" class="empty">No runs match these filters</td></tr>`;
   }
   for (const r of list) {
     const tr = document.createElement("tr");
@@ -808,7 +807,6 @@ function renderRows() {
     tr.innerHTML = `<td class="chk"><input type="checkbox"${on ? " checked" : ""}></td>
       <td class="num">#${r.n}</td>
       <td><div class="run ${cls}"><span class="lbl"></span></div>${D.platformer ? "" : `<div class="bar ${cls}"><i style="left:${r.s}%;width:${Math.max(1, r.e - r.s)}%"></i></div>`}</td>
-      <td class="len">${clock(r.d)}</td>
       <td class="time">${r.u ? clock(r.o) : '<span class="nolink">-</span>'}</td>
       <td class="act">${r.u ? `<a class="watch" target="_blank" rel="noopener">${PLAY_ICON}Watch</a>` : '<span class="nolink">No VOD</span>'}${editMode ? `<button class="delrun" title="Delete this run">${TRASH_ICON}</button>` : ""}</td>`;
     tr.querySelector(".lbl").textContent = label(r);
