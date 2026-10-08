@@ -128,6 +128,8 @@ a.btn { color: inherit; text-decoration: none; }
 .scard:hover .go { color: var(--accent-text); }
 .scard .live { padding: 2px 8px; font-size: 11px; }
 .grid .notice { grid-column: 1 / -1; padding: 32px 20px; }
+.section-note { color: var(--muted); font-size: 13px; margin: -6px 0 12px; }
+.tag.guest { background: var(--surface-2); color: var(--muted); }
 
 /* Card + toolbar */
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
@@ -280,6 +282,11 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
     <div class="beta"><span class="tag">Beta</span><span>This site is in beta. Right now cawzmik is only adding a few streamers. A version in the same format that anyone can use is planned for the future.</span></div>
     <h2 class="section">Streamers</h2>
     <div class="grid" id="homeGrid"></div>
+    <div id="guestWrap" style="display:none">
+      <h2 class="section">Guests from the last 24 hours</h2>
+      <p class="section-note">Anyone can play with the mod. Guest runs show here for 24 hours after they play, then they're removed.</p>
+      <div class="grid" id="guestGrid"></div>
+    </div>
   </section>
 
   <nav class="streamers" id="streamers"></nav>
@@ -349,6 +356,7 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
 const params = new URLSearchParams(location.search);
 const GIST = params.get("gist") || "c66de21bf81b169405f9e07a485d63cc";
 const REFRESH_MS = 2 * 60 * 1000;
+const GUEST_SECONDS = 24 * 3600;
 const TOKEN_KEY = "vodtracker-gist-token";
 // Bug reports and feedback go through a Cloudflare Worker, which passes them on to Discord.
 // The Discord webhook itself is kept inside the Worker.
@@ -391,6 +399,9 @@ const levelTag = l => `${l.streamer}--${l.key}`;
 const sessionTag = (l, s) => `${l.streamer}--${l.key}--${s.id}`;
 const currentLevel = () => levels.find(l => l.streamer === streamer && l.key === levelKey);
 const isLive = l => nowS() - Math.max(...l.sessions.map(s => s.last)) < 10 * 60;
+const isGuest = name => levels.some(l => l.streamer === name && l.guest);
+const lastPlayed = name => Math.max(...levels.filter(l => l.streamer === name).map(l => Math.max(...l.sessions.map(s => s.last))));
+const hoursLeft = name => Math.max(1, Math.ceil((lastPlayed(name) + GUEST_SECONDS - nowS()) / 3600));
 
 function toRuns(s) {
   return s.runs.map(a => {
@@ -456,9 +467,16 @@ async function load() {
     for (const l of out) l.sessions = (l.sessions || []).filter(s => !hidden.sessions.includes(sessionTag(l, s)));
     const visible = out.filter(l => l.sessions.length && !hidden.streamers.includes(l.streamer) && !hidden.levels.includes(levelTag(l)));
     allStreamers = [...new Set(visible.map(l => l.streamer))].sort();
+    // With a whitelist, everyone else is a guest: only their sessions from the
+    // last 24 hours show (the Worker deletes older guest files every hour)
     const shown = (hidden.shown || []).map(n => String(n).toLowerCase());
+    const cutoff = nowS() - GUEST_SECONDS;
+    for (const l of visible) {
+      l.guest = shown.length > 0 && !shown.includes(l.streamer);
+      if (l.guest) l.sessions = l.sessions.filter(s => s.last >= cutoff);
+    }
     levels = visible
-      .filter(l => !shown.length || shown.includes(l.streamer))
+      .filter(l => l.sessions.length)
       .sort((a, b) => b.updated - a.updated);
     lastFetch = Date.now();
     loaded = true;
@@ -573,7 +591,11 @@ async function share() {
 }
 document.querySelectorAll(".share").forEach(b => b.onclick = share);
 
-const streamerNames = () => [...new Set(levels.map(l => l.streamer))];
+// Whitelisted streamers first, then guests
+const streamerNames = () => {
+  const names = [...new Set(levels.map(l => l.streamer))];
+  return [...names.filter(n => !isGuest(n)), ...names.filter(isGuest)];
+};
 
 function setView(home) {
   $("home").style.display = home ? "" : "none";
@@ -593,6 +615,8 @@ function renderHome() {
   document.title = "GD Rewind";
   const grid = $("homeGrid");
   grid.innerHTML = "";
+  $("guestGrid").innerHTML = "";
+  $("guestWrap").style.display = "none";
   const note = html => { const d = document.createElement("div"); d.className = "notice"; d.innerHTML = html; grid.appendChild(d); };
   if (!loaded) {
     if (loadError) { note(""); grid.lastChild.textContent = loadError; }
@@ -600,14 +624,15 @@ function renderHome() {
     return;
   }
   const names = streamerNames();
-  if (!names.length) return note("No streamers yet. They show up here about a minute after someone plays with the mod.");
-
   const info = names.map(name => {
     const mine = levels.filter(l => l.streamer === name);
-    return { name, levels: mine.length, last: Math.max(...mine.map(l => Math.max(...l.sessions.map(s => s.last)))), live: mine.some(isLive) };
+    return { name, levels: mine.length, last: lastPlayed(name), live: mine.some(isLive), guest: isGuest(name) };
   }).sort((a, b) => (b.live - a.live) || (b.last - a.last));
+  const members = info.filter(it => !it.guest), guests = info.filter(it => it.guest);
+  if (!members.length) note("No streamers yet. They show up here about a minute after someone plays with the mod.");
+  if (guests.length) $("guestWrap").style.display = "";
 
-  for (const it of info) {
+  for (const it of [...members, ...guests]) {
     const b = document.createElement("button");
     b.className = "scard";
     b.appendChild(avatarEl(it.name));
@@ -615,11 +640,13 @@ function renderHome() {
     text.innerHTML = '<div class="name"></div><div class="meta"></div>';
     text.querySelector(".name").textContent = it.name;
     if (it.live) text.querySelector(".name").insertAdjacentHTML("beforeend", '<span class="live">Playing now</span>');
-    text.querySelector(".meta").textContent = `${it.levels} ${it.levels === 1 ? "level" : "levels"} · played ${ago(nowS() - it.last)}`;
+    text.querySelector(".meta").textContent = it.guest
+      ? `${it.levels} ${it.levels === 1 ? "level" : "levels"} · removed in ${hoursLeft(it.name)}h`
+      : `${it.levels} ${it.levels === 1 ? "level" : "levels"} · played ${ago(nowS() - it.last)}`;
     b.appendChild(text);
     b.insertAdjacentHTML("beforeend", '<svg class="go" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>');
     b.onclick = () => go(it.name);
-    grid.appendChild(b);
+    (it.guest ? $("guestGrid") : grid).appendChild(b);
   }
 }
 
@@ -678,7 +705,8 @@ function showSession() {
   $("title").textContent = D.level;
   if (live) $("title").insertAdjacentHTML("beforeend", '<span class="live">Playing now</span>');
   const date = new Date(D.started * 1000).toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
-  $("sub").textContent = `${streamer} · ${date} · ${dur(D.last - D.started)} session`;
+  $("sub").textContent = `${streamer} · ${date} · ${dur(D.last - D.started)} session`
+    + (isGuest(streamer) ? ` · Guest, removed in ${hoursLeft(streamer)}h` : "");
 
   renderStats();
   renderFilters();
@@ -979,8 +1007,8 @@ function renderShown() {
   const note = document.createElement("div");
   note.className = "note";
   note.textContent = shown.length
-    ? "Only the streamers marked Shown appear on the site. Remove everyone to show all streamers again."
-    : "Everyone who uploads appears on the site right now. Add a name to only show the streamers on this list.";
+    ? "Streamers marked Shown always appear. Everyone else shows as a guest for 24 hours after they play, then their runs are removed. Remove everyone from the list to keep all streamers permanently again."
+    : "Everyone who uploads stays on the site permanently right now. Add a name to keep only the streamers on this list; everyone else becomes a guest whose runs are removed 24 hours after they play.";
   box.appendChild(note);
 
   const row = (kind, on, name, btnText, onClick) => {
@@ -999,7 +1027,7 @@ function renderShown() {
   }
   if (shown.length) {
     for (const name of allStreamers.filter(n => !shown.includes(n))) {
-      row("Not shown", false, name, "Show", () => setShown([...shown, name]));
+      row("Guest", false, name, "Show", () => setShown([...shown, name]));
     }
   }
 
@@ -1011,7 +1039,7 @@ function renderShown() {
     const name = input.value.trim().toLowerCase();
     if (!name) return;
     if (!shown.length && allStreamers.some(n => n !== name) &&
-        !confirm(`Once the list has a name, only listed streamers appear. Everyone else (${allStreamers.filter(n => n !== name).join(", ")}) gets hidden from the site until you add them.\n\nAdd ${name}?`)) return;
+        !confirm(`Once the list has a name, everyone else (${allStreamers.filter(n => n !== name).join(", ")}) becomes a guest. Guest runs only show for 24 hours and then get deleted.\n\nAdd ${name}?`)) return;
     setShown([...shown, name]);
   };
   add.querySelector("button").onclick = submit;
