@@ -279,6 +279,7 @@ a.btn { color: inherit; text-decoration: none; }
 .runs .line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .runs .bar { max-width: 260px; margin-top: 6px; }
 .runs .when { font-size: 13px; color: var(--muted); }
+.run .day { font-size: 12px; font-weight: 500; color: var(--faint); font-family: inherit; letter-spacing: 0; }
 .runs .act { text-align: right; }
 .lv-head .sub a { color: var(--accent-text); text-decoration: none; }
 .lv-head .sub a:hover { text-decoration: underline; }
@@ -708,6 +709,9 @@ let loadError = "";
 let streamer = (params.get("streamer") || "").toLowerCase() || null;
 let levelPage = streamer ? null : (params.get("level") || "").toLowerCase().trim() || null;
 let levelKey = null, sessionId = null;
+// sessionId can also be ALL: every uploaded session of the level together
+const ALL = "all";
+const isAll = () => sessionId === ALL;
 let typeFilter = "all", startFilter = "all";
 // How a streamer's level dropdown is ordered: "recent" or "attempts"
 let streamerSort = "recent";
@@ -731,7 +735,7 @@ function toRuns(s) {
   return s.runs.map(a => {
     const [n, st, e, f, t, d, vi, o, acc, hits] = a;
     // nc: noclip run (got hit without dying), with noclip accuracy and deaths
-    return { n, s: st, e, p: !!(f & 1), c: !!(f & 2), nc: !!(f & 4), acc, hits, t, d, o,
+    return { n, sid: s.id, s: st, e, p: !!(f & 1), c: !!(f & 2), nc: !!(f & 4), acc, hits, t, d, o,
       u: vi >= 0 && s.vods[vi] ? `https://www.twitch.tv/videos/${s.vods[vi]}?t=${twitchT(o)}` : null };
   });
 }
@@ -1793,8 +1797,9 @@ function render() {
 
   const lvl = currentLevel();
   const sessions = [...lvl.sessions].sort((a, b) => b.id - a.id);
-  if (!sessions.some(s => s.id === sessionId)) sessionId = sessions[0].id;
-  fillSelect($("sessionSel"), sessions.map(s => [s.id, `${when(s.started)} · ${plural(s.runs.length, "attempt")}`]), sessionId);
+  if (!isAll() && !sessions.some(s => s.id === sessionId)) sessionId = sessions[0].id;
+  const allItem = [ALL, `All time · ${plural(attempts(lvl), "attempt")} · ${plural(sessions.length, "session")}`];
+  fillSelect($("sessionSel"), [allItem, ...sessions.map(s => [s.id, `${when(s.started)} · ${plural(s.runs.length, "attempt")}`])], sessionId);
   $("pickers").style.display = "";
 
   showSession();
@@ -1811,13 +1816,23 @@ function fillSelect(sel, items, value) {
 
 function showSession() {
   const lvl = currentLevel();
-  const s = lvl && lvl.sessions.find(x => x.id === sessionId);
-  if (!s) return;
-  D = { level: lvl.level, platformer: lvl.platformer, started: s.started, last: s.last, runs: toRuns(s) };
+  if (!lvl) return;
+  if (isAll()) {
+    const all = [...lvl.sessions].sort((a, b) => a.started - b.started);
+    if (!all.length) return;
+    D = { level: lvl.level, platformer: lvl.platformer, all: true, count: all.length,
+      started: all[0].started, last: Math.max(...all.map(x => x.last)), runs: all.flatMap(toRuns) };
+  } else {
+    const s = lvl.sessions.find(x => x.id === sessionId);
+    if (!s) return;
+    D = { level: lvl.level, platformer: lvl.platformer, started: s.started, last: s.last, runs: toRuns(s) };
+  }
   $("notice").style.display = "none";
   $("main").style.display = "";
+  // Deleting a whole session doesn't make sense for the all time view
+  $("delSession").style.display = D.all ? "none" : "";
 
-  const live = nowS() - s.last < 10 * 60;
+  const live = nowS() - D.last < 10 * 60;
   setBanner($("heroBanner"), $("heroBg"), groupOf(lvl));
   $("title").textContent = "";
   const lvlLink = document.createElement("a");
@@ -1833,7 +1848,8 @@ function showSession() {
   $("title").appendChild(lvlLink);
   if (live) $("title").insertAdjacentHTML("beforeend", '<span class="live">Playing now</span>');
   const date = new Date(D.started * 1000).toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
-  $("sub").textContent = `${streamer} · ${date} · ${dur(D.last - D.started)} session`
+  const since = new Date(D.started * 1000).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
+  $("sub").textContent = (D.all ? `${streamer} · All time · ${plural(D.count, "session")} since ${since}` : `${streamer} · ${date} · ${dur(D.last - D.started)} session`)
     + (isGuest(streamer) ? ` · Guest, removed in ${hoursLeft(streamer)}h` : "");
 
   renderStats();
@@ -1843,7 +1859,9 @@ function showSession() {
 }
 
 const label = r => D.platformer ? (r.c ? `Beat it in ${clock(r.d)}` : `Died after ${clock(r.d)}`) : `${r.s}%-${r.e}%`;
-const selKey = r => `${sessionId}:${r.n}`;
+const selKey = r => `${r.sid}:${r.n}`;
+// Run numbers restart every session, so the all time view also shows the day
+const runDay = r => new Date(r.t * 1000).toLocaleDateString([], { month: "short", day: "numeric" });
 
 function renderStats() {
   // Noclip runs don't count toward real stats
@@ -1854,7 +1872,7 @@ function renderStats() {
   note.style.display = runs.length && !linked ? "" : "none";
   if (!linked) {
     const t = $("vodNoteText");
-    t.innerHTML = "<b>No VODs for this session.</b> ";
+    t.innerHTML = D.all ? "<b>No VODs for this level.</b> " : "<b>No VODs for this session.</b> ";
     t.append(`${streamer} probably wasn't live while playing, so there's nothing to watch. Runs show up with a Watch button when they're played on stream.`);
   }
   let stats;
@@ -1917,9 +1935,10 @@ function shown() {
     return true;
   });
   const sort = $("sort").value;
-  if (sort === "newest") list.sort((a, b) => b.n - a.n);
-  else if (sort === "oldest") list.sort((a, b) => a.n - b.n);
-  else list.sort((a, b) => (b.c - a.c) || (D.platformer ? b.d - a.d : ((b.e - b.s) - (a.e - a.s)) || (b.e - a.e)) || (b.n - a.n));
+  const newer = (a, b) => (b.t - a.t) || (b.n - a.n);
+  if (sort === "newest") list.sort(newer);
+  else if (sort === "oldest") list.sort((a, b) => newer(b, a));
+  else list.sort((a, b) => (b.c - a.c) || (D.platformer ? b.d - a.d : ((b.e - b.s) - (a.e - a.s)) || (b.e - a.e)) || newer(a, b));
   return list;
 }
 
@@ -1945,6 +1964,7 @@ function renderRows() {
     if (r.nc) run.insertAdjacentHTML("beforeend", `<span class="tag nc">${noclipText(r)}</span>`);
     else if (r.p) run.insertAdjacentHTML("beforeend", '<span class="tag">practice</span>');
     if (r.c) run.insertAdjacentHTML("beforeend", '<span class="tag win">complete</span>');
+    if (D.all) run.insertAdjacentHTML("beforeend", `<span class="day">${runDay(r)}</span>`);
     if (r.u) tr.querySelector("a").href = r.u;
     if (editMode) tr.querySelector(".delrun").onclick = () => deleteRun(r);
     tr.querySelector("input").onchange = e => {
@@ -1965,7 +1985,7 @@ function count() {
 }
 
 const noclipText = r => `noclip ${Number(r.acc ?? 0).toFixed(1)}% · ${r.hits ?? 0} ${r.hits === 1 ? "death" : "deaths"}`;
-const lines = runs => runs.map(r => `#${r.n} ${label(r)}${r.nc ? ` (${noclipText(r)})` : r.p ? " (practice)" : ""} ${r.u || "(no VOD)"}`).join("\n");
+const lines = runs => runs.map(r => `${D && D.all ? runDay(r) + " " : ""}#${r.n} ${label(r)}${r.nc ? ` (${noclipText(r)})` : r.p ? " (practice)" : ""} ${r.u || "(no VOD)"}`).join("\n");
 
 function toast(msg) {
   const t = $("toast"); t.textContent = msg; t.classList.add("show");
@@ -2011,8 +2031,8 @@ $("clearSel").onclick = () => { if (!D) return; for (const r of D.runs) selected
 $("sort").onchange = renderRows;
 $("min").oninput = renderRows;
 $("startSel").onchange = e => { startFilter = e.target.value; renderRows(); };
-$("levelSel").onchange = e => { levelKey = e.target.value; sessionId = null; startFilter = "all"; render(); };
-$("sessionSel").onchange = e => { sessionId = Number(e.target.value); startFilter = "all"; showSession(); };
+$("levelSel").onchange = e => { levelKey = e.target.value; sessionId = isAll() ? ALL : null; startFilter = "all"; render(); };
+$("sessionSel").onchange = e => { sessionId = e.target.value === ALL ? ALL : Number(e.target.value); startFilter = "all"; showSession(); };
 $("refresh").onclick = load;
 
 // ---- Support us menu (one Ko-fi link per developer)
@@ -2089,7 +2109,7 @@ function setEditMode(on) {
 
 function deleteRun(r) {
   const l = currentLevel();
-  const s = l && l.sessions.find(x => x.id === sessionId);
+  const s = l && l.sessions.find(x => x.id === r.sid);
   if (!s) return;
   if (!confirm(`Delete run #${r.n} (${label(r)}) from ${l.level}?\n\nYou can restore it later from "Deleted items".`)) return;
   hidden.runs.push(runTag(l, s, r.n));
@@ -2134,7 +2154,7 @@ async function saveHidden(extraChanges = {}, stayOnSession = false) {
   try {
     await patchGist({ ...extraChanges, "hidden.json": { content: JSON.stringify(hidden) } });
     toast("Saved");
-    if (!stayOnSession) sessionId = null;
+    if (!stayOnSession && !isAll()) sessionId = null;
     await load();
   } catch (err) {
     alert(err.message || err);
