@@ -1344,6 +1344,21 @@ function aredlByName() {
   return map;
 }
 
+// Looser copy names like "Slaughterhouse start" or "GRIEF from 60%". Only used
+// when what's left is an AREDL level, so a real name like "Fresh Start" stays.
+const LOOSE_TAIL = new Set(["start", "starts", "from", "at", "prac", "practice"]);
+function looseAredl(base) {
+  const words = base.split(/\s+/).filter(Boolean);
+  let cut = words.length, loose = false;
+  while (cut > 1) {
+    const w = wordOf(words[cut - 1]);
+    if (LOOSE_TAIL.has(w)) { loose = true; cut--; continue; }
+    if (!w || SP_FILL.has(w) || /^\d+%?$/.test(words[cut - 1])) { cut--; continue; }
+    break;
+  }
+  return loose && cut < words.length ? aredlByName().get(normKey(words.slice(0, cut).join(" "))) || null : null;
+}
+
 let groupCache = null;
 function levelGroups() {
   if (groupCache) return groupCache;
@@ -1352,7 +1367,7 @@ function levelGroups() {
     const { base, copy } = splitName(l.level || l.key);
     const byId = !l.platformer && aredlOf(l);
     let key = normKey(byId ? byId[2] : base);
-    const info = byId ? [...byId, gdId(l)] : (!l.platformer && aredlByName().get(key)) || null;
+    const info = byId ? [...byId, gdId(l)] : (!l.platformer && (aredlByName().get(key) || looseAredl(base))) || null;
     if (info && !byId) key = normKey(info[2]);
     // Anything that isn't the listed level itself, or was named like a copy, is a copy
     const isCopy = copy || l.key.startsWith("local_") || (!!info && !byId);
