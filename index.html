@@ -96,18 +96,13 @@ a.btn { color: inherit; text-decoration: none; }
 .kofi-menu a b { font-weight: 600; font-size: 14px; }
 .kofi-menu a span { font-size: 12px; color: var(--muted); }
 @media (max-width: 560px) {
-  .btn.kofi span, #reportBtn span { display: none; }
-  .btn.kofi, #reportBtn { width: 34px; padding: 0; justify-content: center; }
+  .btn.kofi span { display: none; }
+  .btn.kofi { width: 34px; padding: 0; justify-content: center; }
   .status { gap: 4px; }
   .topbar { gap: 8px; }
   .brand { gap: 8px; }
   .brand-wrap { gap: 6px; }
   .brand { white-space: nowrap; }
-}
-/* The report label is long, so it drops to just the icon before the others do */
-@media (max-width: 900px) {
-  #reportBtn span { display: none; }
-  #reportBtn { width: 34px; padding: 0; justify-content: center; }
 }
 .spin svg { animation: spin .8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
@@ -157,9 +152,6 @@ a.btn { color: inherit; text-decoration: none; }
 .hsearch > svg { width: 15px; height: 15px; }
 .hsearch kbd { font: 600 11px Inter, system-ui, sans-serif; color: var(--muted); border: 1px solid var(--border-strong); border-radius: 5px; padding: 0 5px; }
 .hsearch:focus-within kbd { display: none; }
-.bsearch { max-width: 640px; height: 56px; margin: 30px auto 0; padding: 0 7px 0 18px; border-radius: 16px; border-color: var(--border-strong); font-size: 16px; text-align: left; }
-.bsearch > svg { width: 19px; height: 19px; }
-.bsearch .btn { height: 42px; padding: 0 18px; border-radius: 11px; font-weight: 600; }
 .results { position: absolute; left: -1px; right: -1px; top: calc(100% + 6px); z-index: 8; max-height: min(420px, 70vh); overflow-y: auto; padding: 6px; border-radius: 12px; border: 1px solid var(--border-strong); background: var(--surface); box-shadow: 0 10px 30px rgba(0,0,0,.3); text-align: left; font-size: 14px; }
 .results[hidden] { display: none; }
 .results .rhead { padding: 6px 10px 4px; font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
@@ -203,12 +195,9 @@ a.btn { color: inherit; text-decoration: none; }
 .hero .banner.has-img { min-height: 170px; margin-bottom: 0; }
 
 /* Home */
-.home-hero { text-align: center; padding: 56px 0 8px; }
+.home-hero { text-align: center; padding: 48px 0 4px; }
 .home-hero h1 { margin: 0 0 10px; font-size: 40px; line-height: 1.15; letter-spacing: -.025em; font-weight: 700; }
 .home-hero .lead { margin: 0 auto; max-width: 560px; color: var(--muted); font-size: 16px; }
-.try { margin-top: 14px; font-size: 14px; color: var(--faint); }
-.try button { border: 0; background: none; padding: 0; margin: 0 6px; color: var(--muted); cursor: pointer; border-bottom: 1px dashed var(--border-strong); }
-.try button:hover { color: var(--text); border-bottom-color: var(--muted); }
 .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 44px; }
 .feat { position: relative; overflow: hidden; padding: 18px 18px 20px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow); text-align: left; cursor: pointer; transition: border-color .15s; }
 .feat:hover { border-color: var(--border-strong); }
@@ -434,12 +423,14 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
   .features, .top3 { grid-template-columns: 1fr; }
   .home-hero { padding-top: 28px; }
   .home-hero h1 { font-size: 30px; }
-  .bsearch { height: 52px; padding-left: 14px; }
-  .bsearch .btn { padding: 0 14px; }
   .features { margin-top: 32px; }
 }
-/* The header search needs room, so it goes first on narrow screens (the home page has its own) */
-@media (max-width: 860px) { .hsearch { display: none; } }
+/* On narrow screens the header search gets its own full-width row under the buttons */
+@media (max-width: 860px) {
+  .topbar { flex-wrap: wrap; }
+  .hsearch { order: 3; flex-basis: 100%; max-width: none; height: 38px; }
+  .hsearch kbd { display: none; }
+}
 @media (max-width: 1180px) { .status .when { display: none; } }
 </style>
 </head>
@@ -472,9 +463,8 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
       <button class="btn icon" id="refresh" title="Refresh">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
       </button>
-      <button class="btn" id="reportBtn" title="Report a bug or send feedback">
+      <button class="btn icon" id="reportBtn" title="Report a bug or send feedback" aria-label="Report a bug or send feedback">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22V4"/><path d="M4 4h13l-2 4.5 2 4.5H4"/></svg>
-        <span>Report Bug / Feedback</span>
       </button>
       <button class="btn" id="editBtn">Edit</button>
       <button class="btn icon" id="themeBtn" title="Switch light or dark mode">
@@ -502,14 +492,7 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
   <section class="home" id="home" style="display:none">
     <div class="home-hero">
       <h1>Find any run from a GD stream</h1>
-      <p class="lead">Search a streamer or level, then click Watch to open the VOD where that attempt started.</p>
-      <div class="search bsearch" id="bigSearchWrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
-        <input type="search" id="bigSearch" placeholder="Search a streamer or a level" autocomplete="off" spellcheck="false" aria-label="Search a streamer or a level">
-        <button class="btn primary" id="bigSearchGo">Search</button>
-        <div class="results" id="bigResults" hidden></div>
-      </div>
-      <div class="try">You can try:<button data-q="GRIEF">GRIEF</button><button data-q="conix">conix</button><button data-q="Bloodbath">Bloodbath</button></div>
+      <p class="lead">Pick a streamer or level, then click Watch to open the VOD where that attempt started.</p>
     </div>
 
     <h2 class="section" id="streamersHead">Streamers</h2>
@@ -1126,20 +1109,12 @@ function makeSearch(input, box, button) {
 }
 
 const topSearch = makeSearch($("topSearch"), $("topResults"));
-const bigSearch = makeSearch($("bigSearch"), $("bigResults"), $("bigSearchGo"));
-document.querySelectorAll(".try button").forEach(b => b.onclick = () => {
-  bigSearch.input.value = b.dataset.q;
-  bigSearch.input.focus();
-  bigSearch.update();
-});
 // "/" jumps to search, like most sites
 document.addEventListener("keydown", e => {
   if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey) return;
   if (/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) return;
-  const target = getComputedStyle($("topSearchWrap")).display !== "none" ? topSearch : (!streamer ? bigSearch : null);
-  if (!target) return;
   e.preventDefault();
-  target.input.focus();
+  topSearch.input.focus();
 });
 
 // ---- home page cards
