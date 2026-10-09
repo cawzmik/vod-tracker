@@ -1303,7 +1303,7 @@ function topCard({ l, s, r, info, score, copy }, i) {
   c.className = "tcard" + (i === 0 && ranked ? " first" : "");
   const live = nowS() - s.last < 10 * 60;
   c.innerHTML = `
-    <div class="thead"><span class="place">${ranked ? `<b>${i + 1}</b>${topMode === "top" ? `<span title="Level weight from its AREDL rank times how far the run got">score ${Math.round(score).toLocaleString()}</span>` : fmtPts(score)}` : ""}</span>${info ? `<span class="listpos">AREDL #${info[0]}</span>` : ""}</div>
+    <div class="thead"><span class="place">${ranked ? `<b>${i + 1}</b>${topMode === "top" ? `<span title="Level weight from its AREDL rank times how far the run got">${Math.round(score).toLocaleString()} pts</span>` : fmtPts(score)}` : ""}</span>${info ? `<span class="listpos">AREDL #${info[0]}</span>` : ""}</div>
     <div class="tlvl"><button class="lvl"></button>${copy ? '<span class="tag copy">copy</span>' : ""}${r.c ? '<span class="tag win">Beaten</span>' : ""}${live ? '<span class="live">LIVE</span>' : ""}</div>
     <button class="who"><span class="nm"></span></button>
     <div class="trun ${r.c ? "done" : ""}"></div>
