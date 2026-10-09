@@ -1875,15 +1875,17 @@ function renderStats() {
     t.innerHTML = D.all ? "<b>No VODs for this level.</b> " : "<b>No VODs for this session.</b> ";
     t.append(`${streamer} probably wasn't live while playing, so there's nothing to watch. Runs show up with a Watch button when they're played on stream.`);
   }
+  // Runs with a VOD were played on stream, the rest weren't
+  const onOff = ["On stream / off stream", `${linked.toLocaleString()} / ${(runs.length - linked).toLocaleString()}`];
   let stats;
   if (D.platformer) {
     stats = [["Attempts", runs.length], ["Completions", runs.filter(r => r.c).length],
-      ["Longest attempt", runs.length ? clock(Math.max(...runs.map(r => r.d))) : "-"], ["Linked to VOD", `${linked}/${runs.length}`]];
+      ["Longest attempt", runs.length ? clock(Math.max(...runs.map(r => r.d))) : "-"], onOff];
   } else {
     const best0 = runs.filter(r => r.s === 0 && !r.p).reduce((m, r) => Math.max(m, r.e), -1);
     const bestRun = [...runs].sort((a, b) => (b.e - b.s) - (a.e - a.s) || b.e - a.e)[0];
     stats = [["Attempts", runs.length], ["Best from 0", best0 >= 0 ? best0 + "%" : "-"],
-      ["Best run", bestRun ? label(bestRun) : "-"], ["Linked to VOD", `${linked}/${runs.length}`]];
+      ["Best run", bestRun ? label(bestRun) : "-"], onOff];
   }
   $("stats").innerHTML = "";
   for (const [k, v] of stats) {
