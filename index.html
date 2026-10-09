@@ -1209,6 +1209,13 @@ const RANGES = [["today", "Today", 86400], ["week", "This week", 7 * 86400], ["a
 const rangeWords = { today: "today", week: "this week", all: "of all time" };
 const fmtPts = n => `${Number(n.toFixed(1)).toLocaleString()} pts`;
 
+// How much a level is worth in Top runs, from its AREDL position: #1 is 1000
+// and it falls off fast near the top, slower further down. AREDL points are
+// too flat for this (#37 is still 70% of #1), which made 58% on #37 beat 23% on #1.
+// With this, 23% on #1 is about 1.5x 58% on #37, beating #37 still beats 23%
+// on #1, and beating #222 beats 10% on #1. Raise 0.38 to favor the top more.
+const levelWeight = pos => 1000 * Math.pow(Math.max(1, pos), -0.38);
+
 function dayLabel(t) {
   const d = new Date(t * 1000), today = new Date();
   const days = Math.round((new Date(today.toDateString()) - new Date(d.toDateString())) / 86400000);
@@ -1229,11 +1236,12 @@ function topEntries() {
     const info = aredlOf(l) || (topMode === "top" && copy ? groupOf(l).info : null);
     if (topMode === "top" && (!info || l.platformer)) continue;
     const pts = info ? info[1] / 10 : 0;
+    const weight = info ? levelWeight(info[0]) : 0;
     for (const s of l.sessions) {
       for (const r of toRuns(s)) {
         if (r.t < since || r.p || r.nc) continue;
         if (topMode === "top" ? r.s !== 0 : !r.c) continue;
-        const score = topMode === "top" ? pts * Math.min(100, r.e) / 100 : pts;
+        const score = topMode === "top" ? weight * Math.min(100, r.e) / 100 : pts;
         // One card per streamer per level, copies included
         const k = topMode === "top" ? `${l.streamer}--${groupKeyOf(l)}` : levelTag(l);
         const prev = best.get(k);
@@ -1262,7 +1270,7 @@ function renderTop() {
   }
   $("topTitle").textContent = `${topMode === "top" ? "Top runs" : "Completions"} ${rangeWords[topRange]}`;
   $("topNote").textContent = topMode === "top"
-    ? "Ranked by the level's AREDL points times how far the run got. Only runs from 0% count, on the level or a copy of it."
+    ? "Ranked by how high the level is on the AREDL times how far the run got, with the top of the list worth a lot more. Only runs from 0% count, on the level or a copy of it."
     : "Levels beaten on stream, hardest first by AREDL points.";
 
   const grid = $("topGrid");
@@ -1295,7 +1303,7 @@ function topCard({ l, s, r, info, score, copy }, i) {
   c.className = "tcard" + (i === 0 && ranked ? " first" : "");
   const live = nowS() - s.last < 10 * 60;
   c.innerHTML = `
-    <div class="thead"><span class="place">${ranked ? `<b>${i + 1}</b>${fmtPts(score)}` : ""}</span>${info ? `<span class="listpos">AREDL #${info[0]}</span>` : ""}</div>
+    <div class="thead"><span class="place">${ranked ? `<b>${i + 1}</b>${topMode === "top" ? `<span title="Level weight from its AREDL rank times how far the run got">score ${Math.round(score).toLocaleString()}</span>` : fmtPts(score)}` : ""}</span>${info ? `<span class="listpos">AREDL #${info[0]}</span>` : ""}</div>
     <div class="tlvl"><button class="lvl"></button>${copy ? '<span class="tag copy">copy</span>' : ""}${r.c ? '<span class="tag win">Beaten</span>' : ""}${live ? '<span class="live">LIVE</span>' : ""}</div>
     <button class="who"><span class="nm"></span></button>
     <div class="trun ${r.c ? "done" : ""}"></div>

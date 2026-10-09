@@ -4,6 +4,10 @@
     "items": [
       {
         "tag": "Site",
+        "text": "Top runs scoring favors the top of the AREDL a lot more, so 23% on GRIEF beats 58% on Slaughterhouse. Cards show a score instead of points"
+      },
+      {
+        "tag": "Site",
         "text": "Top runs counts runs from 0% on startpos copies too, with a copy tag on the card"
       },
       {
