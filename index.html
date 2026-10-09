@@ -1547,7 +1547,7 @@ function renderLevel() {
     who.querySelector(".nm").textContent = p.name;
     who.onclick = () => go(p.name, p.main.key);
     row.querySelector(".att").textContent = p.attempts.toLocaleString();
-    runCell(row.querySelector(".c0"), g, p.best0, p.beat);
+    runCell(row.querySelector(".c0"), g, p.best0, p.beat, true, true);
     if (g.platformer) row.querySelector(".c1").style.visibility = "hidden";
     else runCell(row.querySelector(".c1"), g, p.bestSp, null);
     rows.appendChild(row);
@@ -1680,7 +1680,7 @@ function renderBestRuns(g) {
     who.insertBefore(avatarEl(it.l.streamer), who.firstChild);
     who.querySelector(".nm").textContent = it.l.streamer;
     who.onclick = () => go(it.l.streamer, it.l.key, it.s.id);
-    runCell(row.querySelector(".cell"), g, it, null, false);
+    runCell(row.querySelector(".cell"), g, it, null, false, brMode === "zero");
     row.querySelector(".when").textContent = `${dayLabel(r.t)}${r.u ? ` · ${clock(r.o)} in` : ""}`;
     const act = row.querySelector(".act");
     if (r.u) { act.innerHTML = `<a class="watch" target="_blank" rel="noopener">${PLAY_ICON}Watch</a>`; act.firstChild.href = r.u; }
@@ -1692,7 +1692,8 @@ function renderBestRuns(g) {
   $("brMoreBtn").onclick = () => { brLimit += 10; renderBestRuns(g); };
 }
 
-function runCell(cell, g, it, beat, watch = true) {
+// short: just the end percent ("23%") for runs from 0%
+function runCell(cell, g, it, beat, watch = true, short = false) {
   if (!it) { cell.insertAdjacentHTML("beforeend", '<span class="nolink">-</span>'); return; }
   const r = it.r;
   // Only a real completion goes green: from 0% on the real level, not a copy or startpos
@@ -1700,7 +1701,7 @@ function runCell(cell, g, it, beat, watch = true) {
   const line = document.createElement("div");
   line.className = "line";
   line.innerHTML = `<span class="run ${cls}"></span>`;
-  line.querySelector(".run").textContent = runText(g, r);
+  line.querySelector(".run").textContent = short && !g.platformer && r.s === 0 ? `${r.e}%` : runText(g, r);
   if (beat) line.insertAdjacentHTML("beforeend", '<span class="tag win"></span>'), line.lastChild.textContent = `Beaten ${dayLabel(beat.r.t)}`;
   if (r.p) line.insertAdjacentHTML("beforeend", '<span class="tag">practice</span>');
   if (it.copy) { line.insertAdjacentHTML("beforeend", '<span class="tag copy"></span>'); line.lastChild.textContent = normKey(it.l.level) !== normKey(g.name) ? it.l.level : "copy"; }
