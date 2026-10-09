@@ -369,6 +369,9 @@ td.act { width: 110px; text-align: right; white-space: nowrap; }
 .novod { display: inline-flex; align-items: center; gap: 5px; color: var(--faint); font-size: 13px; cursor: help; white-space: nowrap; }
 .novod svg { width: 13px; height: 13px; opacity: .8; }
 .novod:hover, .novod:focus { color: var(--muted); outline: none; }
+/* Small tooltip for "Not live", placed next to the label and kept on screen */
+.tip { position: fixed; z-index: 20; max-width: 240px; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); font-size: 13px; line-height: 1.45; box-shadow: 0 8px 24px rgba(0,0,0,.3); pointer-events: none; }
+.tip[hidden] { display: none; }
 .vodnote { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 14px; padding: 12px 14px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); color: var(--muted); font-size: 14px; }
 .vodnote svg { flex: none; width: 16px; height: 16px; margin-top: 2px; color: var(--faint); }
 .vodnote b { color: var(--text); font-weight: 600; }
@@ -631,6 +634,7 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
   <button class="btn primary" id="copySel">Copy selected</button>
 </div>
 <div class="toast" id="toast"></div>
+<div class="tip" id="tip" role="tooltip" hidden></div>
 
 <dialog class="report" id="reportDialog">
   <h2>Report a bug or send feedback</h2>
@@ -670,7 +674,7 @@ const TOKEN_KEY = "vodtracker-gist-token";
 const REPORT_URL = "https://gd-rewind-report.cloudflarerewind.workers.dev/";
 const TRASH_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>';
 // Shown instead of Watch when a run has no VOD. Almost always because they weren't streaming.
-const NO_VOD = '<span class="novod" tabindex="0" title="No VOD for this run. They probably weren\'t live, or their Twitch doesn\'t save past broadcasts.">Not live<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.5h.01"/></svg></span>';
+const NO_VOD = '<span class="novod" tabindex="0" aria-label="No VOD for this run. They probably weren\'t live, or their Twitch doesn\'t save past broadcasts.">Not live<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.5h.01"/></svg></span>';
 const PLAY_ICON = '<svg viewBox="0 0 10 10"><path d="M2 1l7 4-7 4z" fill="currentColor"/></svg>';
 
 const $ = id => document.getElementById(id);
@@ -1934,6 +1938,27 @@ async function copy(text, done = "Copied to clipboard") {
   catch { const t = document.createElement("textarea"); t.value = text; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); }
   toast(done);
 }
+
+// ---- "Not live" tooltip
+function showTip(el) {
+  const tip = $("tip");
+  tip.textContent = el.getAttribute("aria-label");
+  tip.hidden = false;
+  const r = el.getBoundingClientRect(), t = tip.getBoundingClientRect();
+  // Above the label, right-aligned with it, but never off screen
+  let left = Math.min(r.right - t.width, window.innerWidth - t.width - 8);
+  left = Math.max(8, left);
+  let top = r.top - t.height - 8;
+  if (top < 8) top = r.bottom + 8;
+  tip.style.left = `${left}px`;
+  tip.style.top = `${top}px`;
+}
+const hideTip = () => { $("tip").hidden = true; };
+document.addEventListener("mouseover", e => { const el = e.target.closest && e.target.closest(".novod"); if (el) showTip(el); });
+document.addEventListener("mouseout", e => { if (e.target.closest && e.target.closest(".novod")) hideTip(); });
+document.addEventListener("focusin", e => { if (e.target.classList && e.target.classList.contains("novod")) showTip(e.target); });
+document.addEventListener("focusout", hideTip);
+window.addEventListener("scroll", hideTip, { passive: true });
 
 // ---- controls
 $("copyShown").onclick = () => D && copy(lines(shown()));
