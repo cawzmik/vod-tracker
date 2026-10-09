@@ -119,7 +119,12 @@ a.btn { color: inherit; text-decoration: none; }
 /* Pickers */
 .pickers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 26px; }
 .field { display: flex; flex-direction: column; gap: 6px; }
-.field > span { font-size: 12px; font-weight: 500; color: var(--muted); }
+.field > span, .fhead > label { font-size: 12px; font-weight: 500; color: var(--muted); }
+/* Both field labels get the same height so the two dropdowns line up */
+.field > span, .fhead { min-height: 24px; display: flex; align-items: center; }
+.fhead { justify-content: space-between; gap: 8px; }
+.seg.mini { padding: 2px; border-radius: 8px; }
+.seg.mini button { padding: 1px 8px; font-size: 12px; line-height: 18px; border-radius: 6px; }
 .select { position: relative; }
 .select select { appearance: none; width: 100%; height: 40px; padding: 0 36px 0 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; box-shadow: var(--shadow); }
 .select select:hover { border-color: var(--border-strong); }
@@ -586,7 +591,7 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
   <nav class="streamers" id="streamers"></nav>
 
   <div class="pickers" id="pickers" style="display:none">
-    <label class="field"><span>Level</span><div class="select"><select id="levelSel"></select></div></label>
+    <div class="field"><div class="fhead"><label for="levelSel">Level</label><div class="seg mini" id="levelOrder"></div></div><div class="select"><select id="levelSel"></select></div></div>
     <label class="field"><span>Session</span><div class="select"><select id="sessionSel"></select></div></label>
   </div>
 
@@ -704,6 +709,9 @@ let streamer = (params.get("streamer") || "").toLowerCase() || null;
 let levelPage = streamer ? null : (params.get("level") || "").toLowerCase().trim() || null;
 let levelKey = null, sessionId = null;
 let typeFilter = "all", startFilter = "all";
+// How a streamer's level dropdown is ordered: "recent" or "attempts"
+let streamerSort = "recent";
+try { if (localStorage.getItem("vodtracker-level-order") === "attempts") streamerSort = "attempts"; } catch { }
 let token = null;
 try { token = localStorage.getItem(TOKEN_KEY); } catch { }
 let editMode = false;
@@ -1745,11 +1753,27 @@ function render() {
     return;
   }
 
-  // Levels with the most attempts (across every uploaded session) come first
+  // The level list can go by most recently played (default) or most attempts.
+  // Either way it opens on what they're playing now or played last.
   const attempts = l => l.sessions.reduce((n, s) => n + s.runs.length, 0);
-  const mine = levels.filter(l => l.streamer === streamer).sort((a, b) => attempts(b) - attempts(a) || b.updated - a.updated);
-  if (!mine.some(l => l.key === levelKey)) levelKey = mine[0].key;
-  fillSelect($("levelSel"), mine.map(l => [l.key, `${l.level} · ${plural(attempts(l), "attempt")}`]), levelKey);
+  const lastOf = l => Math.max(...l.sessions.map(s => s.last));
+  const byRecent = (a, b) => lastOf(b) - lastOf(a);
+  const mine = levels.filter(l => l.streamer === streamer)
+    .sort(streamerSort === "attempts" ? (a, b) => attempts(b) - attempts(a) || byRecent(a, b) : byRecent);
+  if (!mine.some(l => l.key === levelKey)) levelKey = [...mine].sort(byRecent)[0].key;
+  fillSelect($("levelSel"), mine.map(l => [l.key, `${l.level} · ${plural(attempts(l), "attempt")}${isLive(l) ? " · playing now" : ""}`]), levelKey);
+  const order = $("levelOrder");
+  order.innerHTML = "";
+  for (const [k, n] of [["recent", "Recent"], ["attempts", "Most attempts"]]) {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = n; b.className = k === streamerSort ? "on" : "";
+    b.onclick = () => {
+      streamerSort = k;
+      try { localStorage.setItem("vodtracker-level-order", k); } catch { }
+      render();
+    };
+    order.appendChild(b);
+  }
 
   const lvl = currentLevel();
   const sessions = [...lvl.sessions].sort((a, b) => b.id - a.id);
