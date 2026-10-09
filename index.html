@@ -1876,7 +1876,10 @@ function renderStats() {
     t.append(`${streamer} probably wasn't live while playing, so there's nothing to watch. Runs show up with a Watch button when they're played on stream.`);
   }
   // Runs with a VOD were played on stream, the rest weren't
-  const onOff = ["On stream / off stream", `${linked.toLocaleString()} / ${(runs.length - linked).toLocaleString()}`];
+  const off = runs.length - linked;
+  const onOff = runs.length && !off ? ["On stream", "All"]
+    : runs.length && !linked ? ["Off stream", "All"]
+    : ["On stream / off stream", `${linked.toLocaleString()} / ${off.toLocaleString()}`];
   let stats;
   if (D.platformer) {
     stats = [["Attempts", runs.length], ["Completions", runs.filter(r => r.c).length],
