@@ -218,6 +218,58 @@ a.btn { color: inherit; text-decoration: none; }
 .tfoot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12.5px; color: var(--faint); }
 .more { display: flex; justify-content: center; margin-top: 12px; }
 .section { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin: 48px 0 12px; scroll-margin-top: 16px; }
+
+/* Levels list on the home page */
+.lfilter { display: flex; align-items: center; gap: 8px; height: 34px; width: 240px; padding: 0 10px; border-radius: 10px; font-size: 14px; }
+.lfilter > svg { width: 15px; height: 15px; }
+.lgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+.lgrid .notice { grid-column: 1 / -1; padding: 32px 20px; }
+.lcard { display: flex; flex-direction: column; gap: 3px; padding: 14px 16px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow); cursor: pointer; text-align: left; transition: border-color .15s; min-width: 0; }
+.lcard:hover { border-color: var(--accent); }
+.lcard .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.lcard .nm { font-weight: 650; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lcard .meta { font-size: 13px; color: var(--muted); }
+.lcard .best { font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lcard .best.win { color: var(--green); }
+.unranked { font-size: 12px; font-weight: 600; color: var(--muted); background: var(--surface-2); padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
+
+/* Level page */
+.lv-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-top: 8px; }
+.lv-head h1 { margin: 0; font-size: 30px; line-height: 1.15; letter-spacing: -.02em; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.lv-head h1 .listpos, .lv-head h1 .unranked { font-size: 13px; letter-spacing: 0; padding: 3px 10px; }
+.lv-head .btns { display: flex; gap: 8px; flex: none; }
+.board .bhead, .board .brow { display: grid; grid-template-columns: 40px minmax(140px, 1.1fr) minmax(0, 1.4fr) minmax(0, 1.4fr) 84px; gap: 14px; align-items: center; padding: 12px 16px; }
+.board .bhead { font-size: 12px; font-weight: 500; color: var(--muted); border-bottom: 1px solid var(--border); padding-top: 10px; padding-bottom: 10px; }
+.board .brow { border-bottom: 1px solid var(--border); }
+.board .brow:last-child { border-bottom: 0; }
+.board .rk { color: var(--faint); font-size: 13px; font-variant-numeric: tabular-nums; }
+.board .who { margin: 0; font-size: 14px; font-weight: 600; color: var(--text); }
+.board .who .avatar { width: 28px; height: 28px; font-size: 12px; }
+.board .cell { min-width: 0; }
+.board .cell .line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.board .cell .run { font-size: 14px; }
+.board .cell .bar { max-width: 220px; margin-top: 6px; }
+.board .cell .watch { height: 26px; padding: 0 9px; font-size: 12px; }
+.board .cell .when { font-size: 12px; color: var(--faint); }
+.board .att { text-align: right; color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
+.board .cap { display: none; font-size: 11px; color: var(--muted); font-weight: 500; margin-bottom: 2px; }
+.tag.copy { background: var(--surface-2); color: var(--muted); }
+.versions .vrow { display: flex; align-items: center; gap: 12px; padding: 11px 16px; border-bottom: 1px solid var(--border); font-size: 14px; }
+.versions .vrow:last-child { border-bottom: 0; }
+.versions .vname { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
+.versions .vmeta { color: var(--muted); font-size: 13px; margin-left: auto; white-space: nowrap; }
+@media (max-width: 720px) {
+  .lfilter { width: 100%; }
+  .lv-head { flex-direction: column; }
+  .lv-head h1 { font-size: 24px; }
+  .board .bhead { display: none; }
+  .board .brow { grid-template-columns: 28px 1fr auto; gap: 8px 10px; padding: 12px; }
+  .board .cell { grid-column: 2 / -1; }
+  .board .att { grid-column: 3; grid-row: 1; }
+  .board .cap { display: block; }
+  .versions .vrow { flex-wrap: wrap; gap: 6px 10px; }
+  .versions .vmeta { margin-left: 0; width: 100%; }
+}
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
 .scard { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); cursor: pointer; text-align: left; box-shadow: var(--shadow); transition: border-color .15s, background .15s; }
 .scard:hover { border-color: var(--accent); }
@@ -436,6 +488,16 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
     <div class="top3" id="topGrid"></div>
     <div class="more" id="topMore" style="display:none"><button class="btn" id="topMoreBtn"></button></div>
 
+    <div class="shead" id="levelsHead">
+      <div><h2>Levels</h2><p>Startpos copies are counted with the level they're a copy of.</p></div>
+      <div class="ctrls">
+        <div class="search lfilter"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input type="search" id="levelFilter" placeholder="Filter levels" autocomplete="off" spellcheck="false" aria-label="Filter levels"></div>
+        <div class="seg" id="levelSort"></div>
+      </div>
+    </div>
+    <div class="lgrid" id="levelGrid"></div>
+    <div class="more" id="levelMore" style="display:none"><button class="btn" id="levelMoreBtn"></button></div>
+
     <h2 class="section" id="streamersHead">Streamers</h2>
     <p class="section-note">The site is in beta, so cawzmik is only adding a few streamers for now. A version anyone can use is planned.</p>
     <div class="grid" id="homeGrid"></div>
@@ -444,6 +506,27 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
       <p class="section-note">Anyone can play with the mod. Guest runs show here for 24 hours after they play, then they're removed.</p>
       <div class="grid" id="guestGrid"></div>
     </div>
+  </section>
+
+  <section id="levelView" style="display:none">
+    <div class="lv-head">
+      <div>
+        <h1 id="lvTitle"></h1>
+        <div class="sub" id="lvSub"></div>
+      </div>
+      <div class="btns">
+        <a class="btn" id="lvAredl" target="_blank" rel="noopener">View on AREDL</a>
+        <button class="btn share" title="Copy a link to this level"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>Share</button>
+      </div>
+    </div>
+    <div class="stats" id="lvStats"></div>
+    <section class="card board">
+      <div class="bhead"><span>#</span><span>Streamer</span><span>Best from 0%</span><span>Best startpos run</span><span style="text-align:right">Attempts</span></div>
+      <div id="lvRows"></div>
+    </section>
+    <h2 class="section">Versions</h2>
+    <p class="section-note">Every copy of this level that's been played with the mod. Open one to see its sessions.</p>
+    <section class="card versions" id="lvVersions"></section>
   </section>
 
   <nav class="streamers" id="streamers"></nav>
@@ -553,6 +636,7 @@ let loaded = false;      // got data from GitHub at least once
 let pausedUntil = 0;     // GitHub asked us to wait until this time (ms)
 let loadError = "";
 let streamer = (params.get("streamer") || "").toLowerCase() || null;
+let levelPage = streamer ? null : (params.get("level") || "").toLowerCase().trim() || null;
 let levelKey = null, sessionId = null;
 let typeFilter = "all", startFilter = "all";
 let token = null;
@@ -666,6 +750,7 @@ async function load() {
       .filter(l => l.sessions.length)
       .sort((a, b) => b.updated - a.updated);
     lastFetch = Date.now();
+    groupCache = null;
     loaded = true;
     loadError = "";
     render();
@@ -742,24 +827,36 @@ function renderStreamers(names) {
 
 // ---- main render
 // ---- navigation. ?streamer=name opens straight to that person, no streamer is the home page.
-function pageUrl(name) {
+function pageUrl(name = streamer, lvl = levelPage) {
   const p = new URLSearchParams();
   if (params.get("gist")) p.set("gist", params.get("gist"));
   if (name) p.set("streamer", name);
+  else if (lvl) p.set("level", lvl);
   const q = p.toString();
   return location.origin + location.pathname + (q ? "?" + q : "");
 }
 
 function go(name, key = null, sid = null) {
-  streamer = name || null; levelKey = key; sessionId = sid; startFilter = "all";
+  streamer = name || null; levelKey = key; sessionId = sid; startFilter = "all"; levelPage = null;
   closeSearches();
   history.pushState(null, "", pageUrl(streamer));
   render();
   window.scrollTo(0, 0);
 }
 
+// A level page groups a level with all its startpos copies (?level=<name>)
+function goLevel(key) {
+  streamer = null; levelKey = null; sessionId = null; levelPage = key;
+  closeSearches();
+  history.pushState(null, "", pageUrl(null, key));
+  render();
+  window.scrollTo(0, 0);
+}
+
 window.addEventListener("popstate", () => {
-  streamer = (new URLSearchParams(location.search).get("streamer") || "").toLowerCase() || null;
+  const q = new URLSearchParams(location.search);
+  streamer = (q.get("streamer") || "").toLowerCase() || null;
+  levelPage = streamer ? null : (q.get("level") || "").toLowerCase().trim() || null;
   levelKey = null; sessionId = null; startFilter = "all";
   render();
 });
@@ -767,11 +864,11 @@ window.addEventListener("popstate", () => {
 $("homeLink").onclick = e => {
   if (e.metaKey || e.ctrlKey || e.shiftKey) return;
   e.preventDefault();
-  if (streamer) go(null);
+  if (streamer || levelPage) go(null);
 };
 
 async function share() {
-  const url = pageUrl(streamer);
+  const url = pageUrl();
   if (navigator.share && matchMedia("(pointer: coarse)").matches) {
     try { await navigator.share({ title: document.title, url }); return; } catch (err) { if (err.name === "AbortError") return; }
   }
@@ -785,8 +882,11 @@ const streamerNames = () => {
   return [...names.filter(n => !isGuest(n)), ...names.filter(isGuest)];
 };
 
-function setView(home) {
-  $("home").style.display = home ? "" : "none";
+// view: "home", "level" or "streamer"
+function setView(view) {
+  const home = view !== "streamer";
+  $("home").style.display = view === "home" ? "" : "none";
+  $("levelView").style.display = view === "level" ? "" : "none";
   $("streamers").style.display = home ? "none" : "";
   $("delBtns").style.display = home ? "none" : "";
   if (home) {
@@ -799,10 +899,11 @@ function setView(home) {
 }
 
 function renderHome() {
-  setView(true);
+  setView("home");
   document.title = "GD Rewind";
   renderFeatures();
   renderTop();
+  renderLevelList();
   const grid = $("homeGrid");
   grid.innerHTML = "";
   $("guestGrid").innerHTML = "";
@@ -865,7 +966,8 @@ async function loadAredl() {
     } catch { aredl = null; }
   }
   aredlState = aredl ? "ok" : "failed";
-  if (!streamer) renderTop();
+  groupCache = null;
+  if (!streamer) render();
 }
 
 // ---- search (header and home page)
@@ -883,11 +985,11 @@ function searchResults(q) {
       const meta = mine.some(isLive) ? "Playing now" : isGuest(name) ? "Guest" : `${mine.length} ${mine.length === 1 ? "level" : "levels"}`;
       return { type: "streamer", name, meta, go: () => go(name) };
     });
-  const lvls = levels.filter(l => (l.level || "").toLowerCase().includes(q) || gdId(l) === q)
-    .sort((a, b) => rank((a.level || "").toLowerCase()) - rank((b.level || "").toLowerCase()) || attemptsOf(b) - attemptsOf(a)).slice(0, 8)
-    .map(l => {
-      const info = aredlOf(l);
-      return { type: "level", name: l.level || l.key, meta: `${l.streamer} · ${attemptsOf(l)} ${attemptsOf(l) === 1 ? "attempt" : "attempts"}${info ? ` · AREDL #${info[0]}` : ""}`, go: () => go(l.streamer, l.key) };
+  const lvls = findGroups(q)
+    .sort((a, b) => rank(a.key) - rank(b.key) || groupStats(b).attempts - groupStats(a).attempts).slice(0, 8)
+    .map(g => {
+      const st = groupStats(g);
+      return { type: "level", name: g.name, meta: `${g.info ? `AREDL #${g.info[0]} · ` : ""}${plural(st.people.length, "streamer")} · ${plural(st.attempts, "attempt")}`, go: () => goLevel(g.key) };
     });
   return [...people, ...lvls];
 }
@@ -1085,7 +1187,7 @@ function topCard({ l, s, r, info, score }, i) {
     ${l.platformer ? "" : `<div class="bar ${r.c ? "done" : ""}"><i style="left:${r.s}%;width:${Math.max(1, r.e - r.s)}%"></i></div>`}
     <div class="tfoot"><span class="num"></span>${r.u ? `<a class="watch" target="_blank" rel="noopener">${PLAY_ICON}Watch</a>` : '<span class="nolink">No VOD</span>'}</div>`;
   c.querySelector(".lvl").textContent = l.level || l.key;
-  c.querySelector(".lvl").onclick = () => go(l.streamer, l.key, s.id);
+  c.querySelector(".lvl").onclick = () => goLevel(groupKeyOf(l));
   const who = c.querySelector(".who");
   who.insertBefore(avatarEl(l.streamer), who.firstChild);
   who.querySelector(".nm").textContent = l.streamer;
@@ -1098,10 +1200,309 @@ function topCard({ l, s, r, info, score }, i) {
   return c;
 }
 
+// ---- levels, grouped with their startpos copies
+// "GRIEF", "grief sp", "GRIEF startpos copy 2", "GRIEF (SP)", "sp GRIEF" all count
+// as GRIEF. Copies only count for startpos runs, never for runs from 0% or
+// completions, since a copy can be changed.
+const plural = (n, w) => `${n.toLocaleString()} ${w}${n === 1 ? "" : "s"}`;
+const SP_CORE = new Set(["sp", "sps", "startpos", "startposes", "startposs", "startposition", "startpositions", "copy", "copies", "copied"]);
+const SP_FILL = new Set(["w", "with", "and", "&", "+", "of", "ldm"]);
+const wordOf = w => w.toLowerCase().replace(/[^a-z0-9&+]/g, "");
+const isCoreWord = w => SP_CORE.has(w) || /^(sp|startpos(es)?|copy)\d+$/.test(w);
+const normKey = name => String(name || "").toLowerCase().replace(/\s+/g, " ").trim();
+
+function splitName(raw) {
+  let name = String(raw || "").trim(), copy = false;
+  // "(sp)", "[startpos copy]"
+  name = name.replace(/[(\[{]([^)\]}]*)[)\]}]/g, (m, inner) => {
+    const t = inner.split(/[\s_]+/).map(wordOf).filter(Boolean);
+    if (t.length && t.some(isCoreWord) && t.every(w => isCoreWord(w) || SP_FILL.has(w) || w === "start" || w === "pos" || /^v?\d+$/.test(w))) { copy = true; return " "; }
+    return m;
+  });
+  // "GRIEFstartpos"
+  name = name.replace(/(\S)start ?pos(?:es|itions?)?$/i, (m, a) => { copy = true; return a; });
+  let words = name.split(/[\s_]+/).filter(Boolean);
+  const isCoreAt = (ws, i) => isCoreWord(wordOf(ws[i])) ? 1 : (wordOf(ws[i]) === "pos" && i > 0 && wordOf(ws[i - 1]) === "start") ? 2 : 0;
+  // From the end: "sp", "startpos copy 2", "w sp"
+  let i = words.length - 1, cut = -1;
+  while (i > 0) {
+    const w = wordOf(words[i]);
+    const core = isCoreAt(words, i);
+    if (!w) { i--; continue; }
+    if (core) { cut = i - core + 1; i -= core; continue; }
+    if (SP_FILL.has(w) || /^v?\d+$/.test(w)) { i--; continue; }
+    break;
+  }
+  if (cut > 0) {
+    // Also drop "w", "with", "-" right before the first sp word, but not numbers
+    while (cut > 1 && (!wordOf(words[cut - 1]) || SP_FILL.has(wordOf(words[cut - 1])))) cut--;
+    words = words.slice(0, cut);
+    copy = true;
+  }
+  // From the start: "sp GRIEF", "copy of GRIEF"
+  while (words.length > 1) {
+    const w = wordOf(words[0]);
+    if (isCoreWord(w) || w === "of" || !w) { if (w !== "of" && w) copy = true; words.shift(); continue; }
+    if (w === "start" && wordOf(words[1]) === "pos" && words.length > 2) { copy = true; words.splice(0, 2); continue; }
+    break;
+  }
+  return { base: words.join(" ").trim() || String(raw || "").trim(), copy };
+}
+
+// AREDL names, for copies that have their own level id
+let aredlNames = null;
+function aredlByName() {
+  if (aredlNames && aredlNames.src === aredl) return aredlNames.map;
+  const map = new Map(), clash = new Set();
+  const add = (k, v) => { if (map.has(k) && map.get(k)[3] !== v[3]) clash.add(k); else map.set(k, v); };
+  for (const [id, [pos, pts, name]] of Object.entries(aredl || {})) {
+    const v = [pos, pts, name, id];
+    add(normKey(name), v);
+    // "Deimos (ItsHybrid)" can also be found as "Deimos" if nothing else is
+    const plain = normKey(name.replace(/\s*\([^)]*\)\s*$/, ""));
+    if (plain !== normKey(name)) add("~" + plain, v);
+  }
+  for (const k of clash) map.delete(k);
+  for (const [k, v] of [...map]) if (k.startsWith("~")) { map.delete(k); if (!map.has(k.slice(1))) map.set(k.slice(1), v); }
+  aredlNames = { src: aredl, map };
+  return map;
+}
+
+let groupCache = null;
+function levelGroups() {
+  if (groupCache) return groupCache;
+  const groups = new Map();
+  for (const l of levels) {
+    const { base, copy } = splitName(l.level || l.key);
+    const byId = !l.platformer && aredlOf(l);
+    let key = normKey(byId ? byId[2] : base);
+    const info = byId ? [...byId, gdId(l)] : (!l.platformer && aredlByName().get(key)) || null;
+    if (info && !byId) key = normKey(info[2]);
+    // Anything that isn't the listed level itself, or was named like a copy, is a copy
+    const isCopy = copy || l.key.startsWith("local_") || (!!info && !byId);
+    if (!groups.has(key)) groups.set(key, { key, info: null, members: [], platformer: l.platformer });
+    const g = groups.get(key);
+    if (info && (!g.info || byId)) g.info = info;
+    g.members.push({ l, copy: isCopy });
+    l.groupKey = key;
+  }
+  for (const g of groups.values()) {
+    const orig = g.members.filter(m => !m.copy).sort((a, b) => attemptsOf(b.l) - attemptsOf(a.l))[0];
+    const any = [...g.members].sort((a, b) => attemptsOf(b.l) - attemptsOf(a.l))[0];
+    g.name = g.info ? g.info[2] : orig ? orig.l.level : splitName(any.l.level).base;
+    g.stats = null;
+  }
+  groupCache = groups;
+  return groups;
+}
+const groupKeyOf = l => { levelGroups(); return l.groupKey; };
+
+function findGroups(q) {
+  q = normKey(q);
+  const base = normKey(splitName(q).base);
+  return [...levelGroups().values()].filter(g => g.key.includes(q) || g.key.includes(base) || g.members.some(m => normKey(m.l.level).includes(q)) || (g.info && g.info[3] === q) || g.members.some(m => gdId(m.l) === q));
+}
+
+// Per streamer: attempts, best run from 0% and first completion (on the real
+// level only), and the longest startpos run (any version)
+function groupStats(g) {
+  if (g.stats) return g.stats;
+  const per = new Map();
+  let attempts = 0, last = 0;
+  for (const m of g.members) {
+    const name = m.l.streamer;
+    if (!per.has(name)) per.set(name, { name, attempts: 0, best0: null, beat: null, bestSp: null, main: null, last: 0 });
+    const p = per.get(name);
+    if (!m.copy && (!p.main || attemptsOf(m.l) > attemptsOf(p.main))) p.main = m.l;
+    for (const s of m.l.sessions) {
+      p.last = Math.max(p.last, s.last); last = Math.max(last, s.last);
+      for (const r of toRuns(s)) {
+        if (r.nc) continue;
+        p.attempts++; attempts++;
+        if (r.p) continue;
+        const it = { r, s, l: m.l, copy: m.copy };
+        if (g.platformer) {
+          if (m.copy) continue;
+          if (r.c && (!p.beat || r.t < p.beat.r.t)) p.beat = it;
+          // Fastest completion, otherwise the longest attempt
+          const better = !p.best0 || (r.c && !p.best0.r.c) || (r.c === p.best0.r.c && (r.c ? r.d < p.best0.r.d : r.d > p.best0.r.d));
+          if (better) p.best0 = it;
+        } else if (!m.copy && r.s === 0) {
+          if (r.c && (!p.beat || r.t < p.beat.r.t)) p.beat = it;
+          if (!p.best0 || r.e > p.best0.r.e || (r.e === p.best0.r.e && r.t < p.best0.r.t)) p.best0 = it;
+        } else {
+          const len = r.e - r.s, had = p.bestSp ? p.bestSp.r.e - p.bestSp.r.s : -1;
+          if (len > had || (len === had && r.e > p.bestSp.r.e)) p.bestSp = it;
+        }
+      }
+    }
+    if (!p.main) p.main = m.l;
+  }
+  const score = p => g.platformer ? (p.best0 ? (p.best0.r.c ? 1e9 - p.best0.r.d : p.best0.r.d) : -1) : (p.best0 ? p.best0.r.e : -1);
+  const people = [...per.values()].sort((a, b) =>
+    (!!b.beat - !!a.beat) || (a.beat && b.beat ? a.beat.r.t - b.beat.r.t : 0) || score(b) - score(a) ||
+    ((b.bestSp ? b.bestSp.r.e - b.bestSp.r.s : -1) - (a.bestSp ? a.bestSp.r.e - a.bestSp.r.s : -1)) || b.attempts - a.attempts);
+  g.stats = { people, attempts, last, beaten: people.filter(p => p.beat), best: people.find(p => p.best0) || null };
+  return g.stats;
+}
+
+const runText = (g, r) => g.platformer ? (r.c ? `Beat it in ${clock(r.d)}` : `Longest ${clock(r.d)}`) : `${r.s}%-${r.e}%`;
+
+// ---- Levels list on the home page
+let levelSort = "hard", levelAll = false;
+$("levelFilter").oninput = () => { levelAll = false; renderLevelList(); };
+function renderLevelList() {
+  const sortEl = $("levelSort");
+  sortEl.innerHTML = "";
+  for (const [k, n] of [["hard", "Hardest"], ["played", "Most played"], ["recent", "Recent"]]) {
+    const b = document.createElement("button");
+    b.textContent = n; b.className = k === levelSort ? "on" : "";
+    b.onclick = () => { levelSort = k; renderLevelList(); };
+    sortEl.appendChild(b);
+  }
+  const grid = $("levelGrid");
+  grid.innerHTML = "";
+  $("levelMore").style.display = "none";
+  if (!loaded) { grid.innerHTML = '<div class="notice"><div class="skel"></div></div>'; return; }
+  const q = $("levelFilter").value.trim();
+  let list = q ? findGroups(q) : [...levelGroups().values()];
+  const st = g => groupStats(g);
+  if (levelSort === "hard") list.sort((a, b) => (a.info ? a.info[0] : 1e9) - (b.info ? b.info[0] : 1e9) || st(b).attempts - st(a).attempts);
+  else if (levelSort === "played") list.sort((a, b) => st(b).attempts - st(a).attempts);
+  else list.sort((a, b) => st(b).last - st(a).last);
+  if (!list.length) {
+    const d = document.createElement("div"); d.className = "notice";
+    d.textContent = q ? `No level matches "${q}" yet.` : "No levels yet.";
+    return grid.appendChild(d);
+  }
+  const limit = levelAll || q ? list.length : 9;
+  for (const g of list.slice(0, limit)) grid.appendChild(levelCard(g));
+  if (list.length > limit) {
+    $("levelMore").style.display = "";
+    $("levelMoreBtn").textContent = `Show all ${list.length} levels`;
+    $("levelMoreBtn").onclick = () => { levelAll = true; renderLevelList(); };
+  }
+}
+
+function levelCard(g) {
+  const st = groupStats(g);
+  const b = document.createElement("button");
+  b.className = "lcard";
+  b.innerHTML = `<div class="top"><span class="nm"></span>${g.info ? `<span class="listpos">AREDL #${g.info[0]}</span>` : '<span class="unranked">Not on the AREDL</span>'}</div><div class="meta"></div><div class="best"></div>`;
+  b.querySelector(".nm").textContent = g.name;
+  const copies = g.members.filter(m => m.copy).length;
+  b.querySelector(".meta").textContent = `${plural(st.people.length, "streamer")} · ${plural(st.attempts, "attempt")}${copies ? ` · ${plural(copies, "copy")}`.replace("copys", "copies") : ""}`;
+  const best = b.querySelector(".best");
+  if (st.beaten.length) { best.classList.add("win"); best.textContent = `Beaten by ${st.beaten.map(p => p.name).join(", ")}`; }
+  else if (st.best) best.textContent = `Best: ${runText(g, st.best.best0.r)} by ${st.best.name}`;
+  else best.textContent = "No runs from 0% yet";
+  b.onclick = () => goLevel(g.key);
+  return b;
+}
+
+// ---- level page
+function renderLevel() {
+  setView("level");
+  if (!loaded) {
+    document.title = "GD Rewind";
+    $("levelView").style.display = "none";
+    if (loadError) showNotice(loadError);
+    else { $("notice").innerHTML = '<div class="skel"></div><div class="skel" style="max-width:220px"></div>'; $("notice").style.display = ""; }
+    return;
+  }
+  const groups = levelGroups();
+  const g = groups.get(levelPage) || findGroups(levelPage)[0];
+  if (!g) {
+    $("levelView").style.display = "none";
+    document.title = "GD Rewind";
+    showNotice(`Nobody has played "${levelPage}" with the mod yet. Click GD Rewind to go back home.`);
+    $("main").style.display = "none";
+    return;
+  }
+  $("notice").style.display = "none";
+  document.title = `${g.name} · GD Rewind`;
+  const st = groupStats(g);
+  const title = $("lvTitle");
+  title.textContent = g.name;
+  title.insertAdjacentHTML("beforeend", g.info ? `<span class="listpos">AREDL #${g.info[0]} · ${fmtPts(g.info[1] / 10)}</span>` : (g.platformer ? '<span class="unranked">Platformer</span>' : '<span class="unranked">Not on the AREDL</span>'));
+  if (nowS() - st.last < 10 * 60) title.insertAdjacentHTML("beforeend", '<span class="live">Playing now</span>');
+  const others = [...new Set(g.members.map(m => m.l.level).filter(n => normKey(n) !== normKey(g.name)))];
+  $("lvSub").textContent = others.length ? `Also counts ${others.slice(0, 4).join(", ")}${others.length > 4 ? ` and ${others.length - 4} more` : ""}` : `Last played ${ago(nowS() - st.last)}`;
+  $("lvAredl").style.display = g.info ? "" : "none";
+  if (g.info) $("lvAredl").href = `https://aredl.net/list/${g.info[3]}`;
+
+  const best = st.best;
+  const tiles = [
+    ["Attempts", st.attempts.toLocaleString()],
+    ["Streamers", st.people.length],
+    ["Beaten by", st.beaten.length ? st.beaten.map(p => p.name).join(", ") : "Nobody yet"],
+    [g.platformer ? "Best" : "Best from 0%", best ? `${g.platformer ? runText(g, best.best0.r) : best.best0.r.e + "%"} · ${best.name}` : "-"],
+  ];
+  $("lvStats").innerHTML = "";
+  for (const [k, v] of tiles) {
+    const d = document.createElement("div");
+    d.className = "stat";
+    d.innerHTML = "<span></span><b></b>";
+    d.querySelector("span").textContent = k;
+    d.querySelector("b").textContent = v;
+    $("lvStats").appendChild(d);
+  }
+
+  const rows = $("lvRows");
+  rows.innerHTML = "";
+  st.people.forEach((p, i) => {
+    const row = document.createElement("div");
+    row.className = "brow";
+    row.innerHTML = `<span class="rk">${i + 1}</span><button class="who"><span class="nm"></span></button>
+      <div class="cell c0"><div class="cap">${g.platformer ? "Best" : "Best from 0%"}</div></div>
+      <div class="cell c1"><div class="cap">Best startpos run</div></div>
+      <span class="att"></span>`;
+    const who = row.querySelector(".who");
+    who.insertBefore(avatarEl(p.name), who.firstChild);
+    who.querySelector(".nm").textContent = p.name;
+    who.onclick = () => go(p.name, p.main.key);
+    row.querySelector(".att").textContent = p.attempts.toLocaleString();
+    runCell(row.querySelector(".c0"), g, p.best0, p.beat);
+    if (g.platformer) row.querySelector(".c1").style.visibility = "hidden";
+    else runCell(row.querySelector(".c1"), g, p.bestSp, null);
+    rows.appendChild(row);
+  });
+
+  const vs = $("lvVersions");
+  vs.innerHTML = "";
+  const members = [...g.members].sort((a, b) => a.copy - b.copy || attemptsOf(b.l) - attemptsOf(a.l));
+  for (const m of members) {
+    const row = document.createElement("div");
+    row.className = "vrow";
+    row.innerHTML = `<span class="vname"></span><span class="tag ${m.copy ? "copy" : "win"}">${m.copy ? "copy" : "original"}</span><span class="vmeta"></span><button class="btn">Open</button>`;
+    row.querySelector(".vname").textContent = m.l.level || m.l.key;
+    row.querySelector(".vmeta").textContent = `${m.l.streamer} · ${plural(attemptsOf(m.l), "attempt")}`;
+    row.querySelector("button").onclick = () => go(m.l.streamer, m.l.key);
+    vs.appendChild(row);
+  }
+}
+
+function runCell(cell, g, it, beat) {
+  if (!it) { cell.insertAdjacentHTML("beforeend", '<span class="nolink">-</span>'); return; }
+  const r = it.r;
+  // A 0-100 on a copy isn't a real completion, so it stays plain
+  const cls = r.c && !it.copy ? "done" : "";
+  const line = document.createElement("div");
+  line.className = "line";
+  line.innerHTML = `<span class="run ${cls}"></span>`;
+  line.querySelector(".run").textContent = runText(g, r);
+  if (beat) line.insertAdjacentHTML("beforeend", '<span class="tag win"></span>'), line.lastChild.textContent = `Beaten ${dayLabel(beat.r.t)}`;
+  if (it.copy && normKey(it.l.level) !== normKey(g.name)) { line.insertAdjacentHTML("beforeend", '<span class="tag copy"></span>'); line.lastChild.textContent = it.l.level; }
+  if (r.u) { line.insertAdjacentHTML("beforeend", `<a class="watch" target="_blank" rel="noopener">${PLAY_ICON}Watch</a>`); line.lastChild.href = r.u; }
+  cell.appendChild(line);
+  if (!g.platformer) cell.insertAdjacentHTML("beforeend", `<div class="bar ${cls}"><i style="left:${r.s}%;width:${Math.max(1, r.e - r.s)}%"></i></div>`);
+}
+
 function render() {
   for (const box of searches) box.refresh();
+  if (levelPage) return renderLevel();
   if (!streamer) return renderHome();
-  setView(false);
+  setView("streamer");
   document.title = `${streamer} · GD Rewind`;
   if (!loaded) {
     $("pickers").style.display = "none";
@@ -1347,7 +1748,7 @@ $("reportForm").onsubmit = async e => {
         streamer: streamer || "",
         level: lvl ? `${lvl.level} (${lvl.key})` : "",
         session: lvl && D ? when(D.started) : "",
-        page: pageUrl(streamer),
+        page: pageUrl(),
       }),
     });
     if (res.ok) {
@@ -1455,7 +1856,7 @@ $("delStreamer").onclick = () => {
   for (const d of theirs) changes[d.filename] = null;
   levelKey = null;
   streamer = null;
-  history.replaceState(null, "", pageUrl(null));
+  history.replaceState(null, "", pageUrl(null, null));
   saveHidden(changes);
 };
 
