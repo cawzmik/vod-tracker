@@ -1938,7 +1938,11 @@ function shown() {
   const newer = (a, b) => (b.t - a.t) || (b.n - a.n);
   if (sort === "newest") list.sort(newer);
   else if (sort === "oldest") list.sort((a, b) => newer(b, a));
-  else list.sort((a, b) => (b.c - a.c) || (D.platformer ? b.d - a.d : ((b.e - b.s) - (a.e - a.s)) || (b.e - a.e)) || newer(a, b));
+  // Best first: the longest run wins, completed or not (85%-100% isn't better
+  // than 29%-68%). Ties go to a run from 0%, then normal over practice, like the
+  // level page. Platformer runs have no percent, so a beat still comes first there.
+  else if (D.platformer) list.sort((a, b) => (b.c - a.c) || (b.d - a.d) || newer(a, b));
+  else list.sort((a, b) => ((b.e - b.s) - (a.e - a.s)) || ((b.s === 0) - (a.s === 0)) || (a.p - b.p) || newer(a, b));
   return list;
 }
 
