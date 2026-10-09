@@ -140,6 +140,8 @@ a.btn { color: inherit; text-decoration: none; }
 
 .hero-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .hero-top .btn { flex: none; margin-top: 2px; }
+.lvl-link { color: inherit; text-decoration: none; }
+.lvl-link:hover { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
 
 /* Search (header and home page) */
 .search { position: relative; display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow); }
@@ -561,7 +563,7 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
     </div>
     <div class="stats" id="lvStats"></div>
     <section class="card board">
-      <div class="bhead"><span>#</span><span>Streamer</span><span>Best from 0%</span><span>Best startpos run</span><span style="text-align:right">Attempts</span></div>
+      <div class="bhead"><span>#</span><span>Streamer</span><span>Best from 0%</span><span>Best startpos or practice run</span><span style="text-align:right">Attempts</span></div>
       <div id="lvRows"></div>
     </section>
     <div class="shead">
@@ -1398,20 +1400,20 @@ function groupStats(g) {
       for (const r of toRuns(s)) {
         if (r.nc) continue;
         p.attempts++; attempts++;
-        if (r.p) continue;
         const it = { r, s, l: m.l, copy: m.copy };
         if (g.platformer) {
-          if (m.copy) continue;
+          if (m.copy || r.p) continue;
           if (r.c && (!p.beat || r.t < p.beat.r.t)) p.beat = it;
           // Fastest completion, otherwise the longest attempt
           const better = !p.best0 || (r.c && !p.best0.r.c) || (r.c === p.best0.r.c && (r.c ? r.d < p.best0.r.d : r.d > p.best0.r.d));
           if (better) p.best0 = it;
-        } else if (!m.copy && r.s === 0) {
+        } else if (!m.copy && r.s === 0 && !r.p) {
           if (r.c && (!p.beat || r.t < p.beat.r.t)) p.beat = it;
           if (r.e > 0 && (!p.best0 || r.e > p.best0.r.e || (r.e === p.best0.r.e && r.t < p.best0.r.t))) p.best0 = it;
-        } else {
+        } else if (r.e > r.s) {
+          // Startpos and practice runs. A normal run wins a tie over practice.
           const len = r.e - r.s, had = p.bestSp ? p.bestSp.r.e - p.bestSp.r.s : -1;
-          if (len > had || (len === had && r.e > p.bestSp.r.e)) p.bestSp = it;
+          if (len > had || (len === had && (p.bestSp.r.p && !r.p || (p.bestSp.r.p === r.p && r.e > p.bestSp.r.e)))) p.bestSp = it;
         }
       }
     }
@@ -1538,7 +1540,7 @@ function renderLevel() {
     row.className = "brow";
     row.innerHTML = `<span class="rk">${i + 1}</span><button class="who"><span class="nm"></span></button>
       <div class="cell c0"><div class="cap">${g.platformer ? "Best" : "Best from 0%"}</div></div>
-      <div class="cell c1"><div class="cap">Best startpos run</div></div>
+      <div class="cell c1"><div class="cap">Best startpos or practice run</div></div>
       <span class="att"></span>`;
     const who = row.querySelector(".who");
     who.insertBefore(avatarEl(p.name), who.firstChild);
@@ -1624,18 +1626,24 @@ function bestRuns(g) {
   for (const m of g.members) {
     for (const s of m.l.sessions) {
       for (const r of toRuns(s)) {
-        if (r.nc || r.p) continue;
+        if (r.nc) continue;
         const it = { r, s, l: m.l, copy: m.copy };
-        const zero = !m.copy && r.s === 0;
-        if (g.platformer) { if (!m.copy) out.push(it); }
-        else if (zero ? r.e > 0 && brMode !== "sp" : brMode !== "zero") out.push(it);
+        if (g.platformer) { if (!m.copy && !r.p) out.push(it); continue; }
+        // Each run is one kind: from 0% on the real level, startpos (or a copy), or practice
+        const kind = r.p ? "practice" : (!m.copy && r.s === 0) ? "zero" : "sp";
+        const real = kind === "zero" ? r.e > 0 : r.e > r.s;
+        if (real && (brMode === "all" || brMode === kind)) out.push(it);
       }
     }
   }
   if (g.platformer) out.sort((a, b) => (b.r.c - a.r.c) || (a.r.c ? a.r.d - b.r.d : b.r.d - a.r.d) || a.r.t - b.r.t);
   else if (brMode === "zero") out.sort((a, b) => b.r.e - a.r.e || a.r.t - b.r.t);
   // All and Startpos: the longest runs first, a run from 0% wins a tie
-  else out.sort((a, b) => (b.r.e - b.r.s) - (a.r.e - a.r.s) || (a.r.s === 0 && !a.copy ? 0 : 1) - (b.r.s === 0 && !b.copy ? 0 : 1) || b.r.e - a.r.e || a.r.t - b.r.t);
+  else {
+    // Ties: a run from 0% first, then normal runs before practice
+    const rank = it => (it.r.p ? 2 : (it.r.s === 0 && !it.copy ? 0 : 1));
+    out.sort((a, b) => (b.r.e - b.r.s) - (a.r.e - a.r.s) || rank(a) - rank(b) || b.r.e - a.r.e || a.r.t - b.r.t);
+  }
   return out;
 }
 
@@ -1644,22 +1652,23 @@ function renderBestRuns(g) {
   const seg = $("brMode");
   seg.innerHTML = "";
   seg.style.display = g.platformer ? "none" : "";
-  for (const [k, n] of [["all", "All"], ["zero", "From 0%"], ["sp", "Startpos"]]) {
+  for (const [k, n] of [["all", "All"], ["zero", "From 0%"], ["sp", "Startpos"], ["practice", "Practice"]]) {
     const b = document.createElement("button");
     b.textContent = n; b.className = k === brMode ? "on" : "";
     b.onclick = () => { brMode = k; brLimit = 5; renderBestRuns(g); };
     seg.appendChild(b);
   }
   $("brNote").textContent = g.platformer ? "Completions first, fastest at the top."
-    : brMode === "all" ? "Every run on this level, longest first. Startpos runs include copies."
+    : brMode === "all" ? "Every run on this level, longest first. Includes startpos copies and practice."
     : brMode === "zero" ? "Runs from 0% on the real level, furthest first."
+    : brMode === "practice" ? "Practice mode runs, longest first."
     : "Runs from a start position, including startpos copies. Longest first.";
   const box = $("lvRuns");
   box.innerHTML = "";
   const list = bestRuns(g);
   if (!list.length) {
     box.innerHTML = '<div class="empty"></div>';
-    box.firstChild.textContent = brMode === "zero" ? "No runs from 0% yet." : brMode === "sp" ? "No startpos runs yet." : "No runs yet.";
+    box.firstChild.textContent = brMode === "zero" ? "No runs from 0% yet." : brMode === "sp" ? "No startpos runs yet." : brMode === "practice" ? "No practice runs yet." : "No runs yet.";
   }
   list.slice(0, brLimit).forEach((it, i) => {
     const r = it.r;
@@ -1687,12 +1696,13 @@ function runCell(cell, g, it, beat, watch = true) {
   if (!it) { cell.insertAdjacentHTML("beforeend", '<span class="nolink">-</span>'); return; }
   const r = it.r;
   // Only a real completion goes green: from 0% on the real level, not a copy or startpos
-  const cls = r.c && !it.copy && (g.platformer || r.s === 0) ? "done" : "";
+  const cls = r.p ? "prac" : r.c && !it.copy && (g.platformer || r.s === 0) ? "done" : "";
   const line = document.createElement("div");
   line.className = "line";
   line.innerHTML = `<span class="run ${cls}"></span>`;
   line.querySelector(".run").textContent = runText(g, r);
   if (beat) line.insertAdjacentHTML("beforeend", '<span class="tag win"></span>'), line.lastChild.textContent = `Beaten ${dayLabel(beat.r.t)}`;
+  if (r.p) line.insertAdjacentHTML("beforeend", '<span class="tag">practice</span>');
   if (it.copy) { line.insertAdjacentHTML("beforeend", '<span class="tag copy"></span>'); line.lastChild.textContent = normKey(it.l.level) !== normKey(g.name) ? it.l.level : "copy"; }
   if (watch && r.u) { line.insertAdjacentHTML("beforeend", `<a class="watch" target="_blank" rel="noopener">${PLAY_ICON}Watch</a>`); line.lastChild.href = r.u; }
   cell.appendChild(line);
@@ -1754,7 +1764,18 @@ function showSession() {
 
   const live = nowS() - s.last < 10 * 60;
   setBanner($("heroBanner"), $("heroBg"), groupOf(lvl));
-  $("title").textContent = D.level;
+  $("title").textContent = "";
+  const lvlLink = document.createElement("a");
+  lvlLink.className = "lvl-link";
+  lvlLink.textContent = D.level;
+  lvlLink.title = "See everyone's stats on this level";
+  lvlLink.href = pageUrl(null, groupKeyOf(lvl));
+  lvlLink.onclick = e => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+    e.preventDefault();
+    goLevel(groupKeyOf(lvl));
+  };
+  $("title").appendChild(lvlLink);
   if (live) $("title").insertAdjacentHTML("beforeend", '<span class="live">Playing now</span>');
   const date = new Date(D.started * 1000).toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
   $("sub").textContent = `${streamer} · ${date} · ${dur(D.last - D.started)} session`
