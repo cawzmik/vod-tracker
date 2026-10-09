@@ -1223,7 +1223,10 @@ function topEntries() {
   const since = span ? nowS() - span : 0;
   const best = new Map();
   for (const l of levels) {
-    const info = aredlOf(l);
+    // Top runs also counts runs from 0% on a startpos copy (scored like the real
+    // level, with a "copy" tag), since lots of people grind a copy. Completions don't.
+    const copy = isCopyLevel(l);
+    const info = aredlOf(l) || (topMode === "top" && copy ? groupOf(l).info : null);
     if (topMode === "top" && (!info || l.platformer)) continue;
     const pts = info ? info[1] / 10 : 0;
     for (const s of l.sessions) {
@@ -1231,10 +1234,11 @@ function topEntries() {
         if (r.t < since || r.p || r.nc) continue;
         if (topMode === "top" ? r.s !== 0 : !r.c) continue;
         const score = topMode === "top" ? pts * Math.min(100, r.e) / 100 : pts;
-        const k = levelTag(l);
+        // One card per streamer per level, copies included
+        const k = topMode === "top" ? `${l.streamer}--${groupKeyOf(l)}` : levelTag(l);
         const prev = best.get(k);
-        // Ties go to the earlier run (the first time they got there)
-        if (!prev || score > prev.score || (score === prev.score && r.t < prev.r.t)) best.set(k, { l, s, r, info, score });
+        // Ties go to the real level, then the earlier run (the first time they got there)
+        if (!prev || score > prev.score || (score === prev.score && (prev.copy && !copy || prev.copy === copy && r.t < prev.r.t))) best.set(k, { l, s, r, info, score, copy });
       }
     }
   }
@@ -1258,7 +1262,7 @@ function renderTop() {
   }
   $("topTitle").textContent = `${topMode === "top" ? "Top runs" : "Completions"} ${rangeWords[topRange]}`;
   $("topNote").textContent = topMode === "top"
-    ? "Ranked by the level's AREDL points times how far the run got. Only runs from 0% count."
+    ? "Ranked by the level's AREDL points times how far the run got. Only runs from 0% count, on the level or a copy of it."
     : "Levels beaten on stream, hardest first by AREDL points.";
 
   const grid = $("topGrid");
@@ -1285,19 +1289,21 @@ function renderTop() {
   }
 }
 
-function topCard({ l, s, r, info, score }, i) {
+function topCard({ l, s, r, info, score, copy }, i) {
   const c = document.createElement("div");
   const ranked = topMode === "top" || info;
   c.className = "tcard" + (i === 0 && ranked ? " first" : "");
   const live = nowS() - s.last < 10 * 60;
   c.innerHTML = `
     <div class="thead"><span class="place">${ranked ? `<b>${i + 1}</b>${fmtPts(score)}` : ""}</span>${info ? `<span class="listpos">AREDL #${info[0]}</span>` : ""}</div>
-    <div class="tlvl"><button class="lvl"></button>${r.c ? '<span class="tag win">Beaten</span>' : ""}${live ? '<span class="live">LIVE</span>' : ""}</div>
+    <div class="tlvl"><button class="lvl"></button>${copy ? '<span class="tag copy">copy</span>' : ""}${r.c ? '<span class="tag win">Beaten</span>' : ""}${live ? '<span class="live">LIVE</span>' : ""}</div>
     <button class="who"><span class="nm"></span></button>
     <div class="trun ${r.c ? "done" : ""}"></div>
     ${l.platformer ? "" : `<div class="bar ${r.c ? "done" : ""}"><i style="left:${r.s}%;width:${Math.max(1, r.e - r.s)}%"></i></div>`}
     <div class="tfoot"><span class="num"></span>${r.u ? `<a class="watch" target="_blank" rel="noopener">${PLAY_ICON}Watch</a>` : NO_VOD}</div>`;
-  c.querySelector(".lvl").textContent = l.level || l.key;
+  // A copy shows the real level's name, with the copy's own name on hover
+  c.querySelector(".lvl").textContent = copy ? groupOf(l).name : l.level || l.key;
+  if (copy) c.querySelector(".tag.copy").title = `Played on a copy: ${l.level || l.key}`;
   c.querySelector(".lvl").onclick = () => goLevel(groupKeyOf(l));
   const strip = stripEl(groupOf(l));
   strip.style.cursor = "pointer";
@@ -1427,6 +1433,7 @@ function levelGroups() {
 }
 const groupKeyOf = l => { levelGroups(); return l.groupKey; };
 const groupOf = l => levelGroups().get(groupKeyOf(l));
+const isCopyLevel = l => { const g = groupOf(l); const m = g && g.members.find(x => x.l === l); return !!(m && m.copy); };
 const thumbUrl = (g, size = "cards") => g && g.info ? `${THUMBS}${size}/${g.info[3]}.webp` : null;
 const missingThumbs = new Set();
 
