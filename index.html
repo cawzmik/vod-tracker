@@ -234,10 +234,27 @@ a.btn { color: inherit; text-decoration: none; }
 .unranked { font-size: 12px; font-weight: 600; color: var(--muted); background: var(--surface-2); padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
 
 /* Level page */
-.lv-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-top: 8px; }
-.lv-head h1 { margin: 0; font-size: 30px; line-height: 1.15; letter-spacing: -.02em; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.lv-head h1 .listpos, .lv-head h1 .unranked { font-size: 13px; letter-spacing: 0; padding: 3px 10px; }
+.lv-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 8px; }
+.lv-main { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.lv-head h1 { margin: 0; font-size: 32px; line-height: 1.15; letter-spacing: -.02em; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; overflow-wrap: anywhere; }
 .lv-head .btns { display: flex; gap: 8px; flex: none; }
+/* The AREDL spot, big, beside the name. Levels not on the list just don't get one. */
+.rankbox { flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 84px; height: 84px; padding: 0 12px; border-radius: 16px; border: 1px solid var(--accent); background: var(--accent-soft); color: var(--accent-text); text-decoration: none; transition: background .15s; }
+.rankbox:hover { background: var(--accent); color: #fff; }
+.rankbox small { font-size: 10px; font-weight: 700; letter-spacing: .1em; opacity: .85; }
+.rankbox b { font-size: 30px; font-weight: 750; line-height: 1.05; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.rankbox span { font-size: 11px; font-weight: 600; opacity: .85; }
+.runs .rrow { display: grid; grid-template-columns: 40px minmax(140px, 1fr) minmax(0, 1.8fr) 170px 84px; gap: 14px; align-items: center; padding: 11px 16px; border-bottom: 1px solid var(--border); }
+.runs .rrow:last-child { border-bottom: 0; }
+.runs .rk { color: var(--faint); font-size: 13px; font-variant-numeric: tabular-nums; }
+.runs .rk.top { color: var(--accent-text); font-weight: 700; }
+.runs .who { margin: 0; font-size: 14px; font-weight: 600; color: var(--text); }
+.runs .who .avatar { width: 26px; height: 26px; font-size: 11px; }
+.runs .cell { min-width: 0; }
+.runs .line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.runs .bar { max-width: 260px; margin-top: 6px; }
+.runs .when { font-size: 13px; color: var(--muted); }
+.runs .act { text-align: right; }
 .board .bhead, .board .brow { display: grid; grid-template-columns: 40px minmax(140px, 1.1fr) minmax(0, 1.4fr) minmax(0, 1.4fr) 84px; gap: 14px; align-items: center; padding: 12px 16px; }
 .board .bhead { font-size: 12px; font-weight: 500; color: var(--muted); border-bottom: 1px solid var(--border); padding-top: 10px; padding-bottom: 10px; }
 .board .brow { border-bottom: 1px solid var(--border); }
@@ -254,21 +271,22 @@ a.btn { color: inherit; text-decoration: none; }
 .board .att { text-align: right; color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
 .board .cap { display: none; font-size: 11px; color: var(--muted); font-weight: 500; margin-bottom: 2px; }
 .tag.copy { background: var(--surface-2); color: var(--muted); }
-.versions .vrow { display: flex; align-items: center; gap: 12px; padding: 11px 16px; border-bottom: 1px solid var(--border); font-size: 14px; }
-.versions .vrow:last-child { border-bottom: 0; }
-.versions .vname { font-weight: 600; min-width: 0; overflow-wrap: anywhere; }
-.versions .vmeta { color: var(--muted); font-size: 13px; margin-left: auto; white-space: nowrap; }
 @media (max-width: 720px) {
   .lfilter { width: 100%; }
-  .lv-head { flex-direction: column; }
+  .lv-head { flex-direction: column; align-items: flex-start; }
+  .lv-main { gap: 12px; }
   .lv-head h1 { font-size: 24px; }
+  .rankbox { min-width: 68px; height: 68px; border-radius: 14px; }
+  .rankbox b { font-size: 24px; }
+  .runs .rrow { grid-template-columns: 28px 1fr auto; gap: 6px 10px; padding: 12px; }
+  .runs .cell { grid-column: 2 / -1; }
+  .runs .when { grid-column: 2; }
+  .runs .act { grid-column: 3; grid-row: 3; }
   .board .bhead { display: none; }
   .board .brow { grid-template-columns: 28px 1fr auto; gap: 8px 10px; padding: 12px; }
   .board .cell { grid-column: 2 / -1; }
   .board .att { grid-column: 3; grid-row: 1; }
   .board .cap { display: block; }
-  .versions .vrow { flex-wrap: wrap; gap: 6px 10px; }
-  .versions .vmeta { margin-left: 0; width: 100%; }
 }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
 .scard { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); cursor: pointer; text-align: left; box-shadow: var(--shadow); transition: border-color .15s, background .15s; }
@@ -510,12 +528,14 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
 
   <section id="levelView" style="display:none">
     <div class="lv-head">
-      <div>
-        <h1 id="lvTitle"></h1>
-        <div class="sub" id="lvSub"></div>
+      <div class="lv-main">
+        <a class="rankbox" id="lvRank" target="_blank" rel="noopener" title="Open this level on the AREDL"></a>
+        <div>
+          <h1 id="lvTitle"></h1>
+          <div class="sub" id="lvSub"></div>
+        </div>
       </div>
       <div class="btns">
-        <a class="btn" id="lvAredl" target="_blank" rel="noopener">View on AREDL</a>
         <button class="btn share" title="Copy a link to this level"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>Share</button>
       </div>
     </div>
@@ -524,9 +544,12 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
       <div class="bhead"><span>#</span><span>Streamer</span><span>Best from 0%</span><span>Best startpos run</span><span style="text-align:right">Attempts</span></div>
       <div id="lvRows"></div>
     </section>
-    <h2 class="section">Versions</h2>
-    <p class="section-note">Every copy of this level that's been played with the mod. Open one to see its sessions.</p>
-    <section class="card versions" id="lvVersions"></section>
+    <div class="shead">
+      <div><h2>Best runs</h2><p id="brNote"></p></div>
+      <div class="ctrls"><div class="seg" id="brMode"></div></div>
+    </div>
+    <section class="card runs" id="lvRuns"></section>
+    <div class="more" id="brMore" style="display:none"><button class="btn" id="brMoreBtn"></button></div>
   </section>
 
   <nav class="streamers" id="streamers"></nav>
@@ -1329,7 +1352,7 @@ function groupStats(g) {
           if (better) p.best0 = it;
         } else if (!m.copy && r.s === 0) {
           if (r.c && (!p.beat || r.t < p.beat.r.t)) p.beat = it;
-          if (!p.best0 || r.e > p.best0.r.e || (r.e === p.best0.r.e && r.t < p.best0.r.t)) p.best0 = it;
+          if (r.e > 0 && (!p.best0 || r.e > p.best0.r.e || (r.e === p.best0.r.e && r.t < p.best0.r.t))) p.best0 = it;
         } else {
           const len = r.e - r.s, had = p.bestSp ? p.bestSp.r.e - p.bestSp.r.s : -1;
           if (len > had || (len === had && r.e > p.bestSp.r.e)) p.bestSp = it;
@@ -1424,12 +1447,17 @@ function renderLevel() {
   const st = groupStats(g);
   const title = $("lvTitle");
   title.textContent = g.name;
-  title.insertAdjacentHTML("beforeend", g.info ? `<span class="listpos">AREDL #${g.info[0]} · ${fmtPts(g.info[1] / 10)}</span>` : (g.platformer ? '<span class="unranked">Platformer</span>' : '<span class="unranked">Not on the AREDL</span>'));
   if (nowS() - st.last < 10 * 60) title.insertAdjacentHTML("beforeend", '<span class="live">Playing now</span>');
+  const rank = $("lvRank");
+  rank.style.display = g.info ? "" : "none";
+  if (g.info) {
+    rank.href = `https://aredl.net/list/${g.info[3]}`;
+    rank.innerHTML = `<small>AREDL</small><b>#${g.info[0]}</b><span>${fmtPts(g.info[1] / 10)}</span>`;
+  }
   const others = [...new Set(g.members.map(m => m.l.level).filter(n => normKey(n) !== normKey(g.name)))];
-  $("lvSub").textContent = others.length ? `Also counts ${others.slice(0, 4).join(", ")}${others.length > 4 ? ` and ${others.length - 4} more` : ""}` : `Last played ${ago(nowS() - st.last)}`;
-  $("lvAredl").style.display = g.info ? "" : "none";
-  if (g.info) $("lvAredl").href = `https://aredl.net/list/${g.info[3]}`;
+  const bits = [g.info ? "Extreme demon" : g.platformer ? "Platformer level" : "Not on the AREDL",
+    others.length ? `also counts ${others.slice(0, 3).join(", ")}${others.length > 3 ? ` and ${others.length - 3} more` : ""}` : `last played ${ago(nowS() - st.last)}`];
+  $("lvSub").textContent = bits.join(" · ");
 
   const best = st.best;
   const tiles = [
@@ -1468,32 +1496,85 @@ function renderLevel() {
     rows.appendChild(row);
   });
 
-  const vs = $("lvVersions");
-  vs.innerHTML = "";
-  const members = [...g.members].sort((a, b) => a.copy - b.copy || attemptsOf(b.l) - attemptsOf(a.l));
-  for (const m of members) {
-    const row = document.createElement("div");
-    row.className = "vrow";
-    row.innerHTML = `<span class="vname"></span><span class="tag ${m.copy ? "copy" : "win"}">${m.copy ? "copy" : "original"}</span><span class="vmeta"></span><button class="btn">Open</button>`;
-    row.querySelector(".vname").textContent = m.l.level || m.l.key;
-    row.querySelector(".vmeta").textContent = `${m.l.streamer} · ${plural(attemptsOf(m.l), "attempt")}`;
-    row.querySelector("button").onclick = () => go(m.l.streamer, m.l.key);
-    vs.appendChild(row);
-  }
+  renderBestRuns(g);
 }
 
-function runCell(cell, g, it, beat) {
+// ---- best runs on a level, everyone mixed together
+let brMode = "zero", brLevel = null, brLimit = 10;
+function bestRuns(g) {
+  const out = [];
+  for (const m of g.members) {
+    for (const s of m.l.sessions) {
+      for (const r of toRuns(s)) {
+        if (r.nc || r.p) continue;
+        const it = { r, s, l: m.l, copy: m.copy };
+        if (g.platformer) { if (!m.copy) out.push(it); }
+        else if (brMode === "zero") { if (!m.copy && r.s === 0 && r.e > 0) out.push(it); }
+        else if (m.copy || r.s > 0) out.push(it);
+      }
+    }
+  }
+  if (g.platformer) out.sort((a, b) => (b.r.c - a.r.c) || (a.r.c ? a.r.d - b.r.d : b.r.d - a.r.d) || a.r.t - b.r.t);
+  else if (brMode === "zero") out.sort((a, b) => b.r.e - a.r.e || a.r.t - b.r.t);
+  else out.sort((a, b) => (b.r.e - b.r.s) - (a.r.e - a.r.s) || b.r.e - a.r.e || a.r.t - b.r.t);
+  return out;
+}
+
+function renderBestRuns(g) {
+  if (brLevel !== g.key) { brLevel = g.key; brMode = "zero"; brLimit = 10; }
+  const seg = $("brMode");
+  seg.innerHTML = "";
+  seg.style.display = g.platformer ? "none" : "";
+  for (const [k, n] of [["zero", "From 0%"], ["sp", "Startpos"]]) {
+    const b = document.createElement("button");
+    b.textContent = n; b.className = k === brMode ? "on" : "";
+    b.onclick = () => { brMode = k; brLimit = 10; renderBestRuns(g); };
+    seg.appendChild(b);
+  }
+  $("brNote").textContent = g.platformer ? "Completions first, fastest at the top."
+    : brMode === "zero" ? "Every streamer's runs from 0% on the real level, furthest first."
+    : "Runs from a start position, including startpos copies. Longest first.";
+  const box = $("lvRuns");
+  box.innerHTML = "";
+  const list = bestRuns(g);
+  if (!list.length) {
+    box.innerHTML = '<div class="empty"></div>';
+    box.firstChild.textContent = brMode === "zero" ? "No runs from 0% yet." : "No startpos runs yet.";
+  }
+  list.slice(0, brLimit).forEach((it, i) => {
+    const r = it.r;
+    const row = document.createElement("div");
+    row.className = "rrow";
+    row.innerHTML = `<span class="rk${i < 3 ? " top" : ""}">${i + 1}</span><button class="who"><span class="nm"></span></button>
+      <div class="cell"></div><span class="when"></span><span class="act"></span>`;
+    const who = row.querySelector(".who");
+    who.insertBefore(avatarEl(it.l.streamer), who.firstChild);
+    who.querySelector(".nm").textContent = it.l.streamer;
+    who.onclick = () => go(it.l.streamer, it.l.key, it.s.id);
+    runCell(row.querySelector(".cell"), g, it, null, false);
+    row.querySelector(".when").textContent = `${dayLabel(r.t)}${r.u ? ` · ${clock(r.o)} in` : ""}`;
+    const act = row.querySelector(".act");
+    if (r.u) { act.innerHTML = `<a class="watch" target="_blank" rel="noopener">${PLAY_ICON}Watch</a>`; act.firstChild.href = r.u; }
+    else act.innerHTML = '<span class="nolink">No VOD</span>';
+    box.appendChild(row);
+  });
+  $("brMore").style.display = list.length > brLimit ? "" : "none";
+  $("brMoreBtn").textContent = `Show ${Math.min(25, list.length - brLimit)} more`;
+  $("brMoreBtn").onclick = () => { brLimit += 25; renderBestRuns(g); };
+}
+
+function runCell(cell, g, it, beat, watch = true) {
   if (!it) { cell.insertAdjacentHTML("beforeend", '<span class="nolink">-</span>'); return; }
   const r = it.r;
-  // A 0-100 on a copy isn't a real completion, so it stays plain
-  const cls = r.c && !it.copy ? "done" : "";
+  // Only a real completion goes green: from 0% on the real level, not a copy or startpos
+  const cls = r.c && !it.copy && (g.platformer || r.s === 0) ? "done" : "";
   const line = document.createElement("div");
   line.className = "line";
   line.innerHTML = `<span class="run ${cls}"></span>`;
   line.querySelector(".run").textContent = runText(g, r);
   if (beat) line.insertAdjacentHTML("beforeend", '<span class="tag win"></span>'), line.lastChild.textContent = `Beaten ${dayLabel(beat.r.t)}`;
-  if (it.copy && normKey(it.l.level) !== normKey(g.name)) { line.insertAdjacentHTML("beforeend", '<span class="tag copy"></span>'); line.lastChild.textContent = it.l.level; }
-  if (r.u) { line.insertAdjacentHTML("beforeend", `<a class="watch" target="_blank" rel="noopener">${PLAY_ICON}Watch</a>`); line.lastChild.href = r.u; }
+  if (it.copy) { line.insertAdjacentHTML("beforeend", '<span class="tag copy"></span>'); line.lastChild.textContent = normKey(it.l.level) !== normKey(g.name) ? it.l.level : "copy"; }
+  if (watch && r.u) { line.insertAdjacentHTML("beforeend", `<a class="watch" target="_blank" rel="noopener">${PLAY_ICON}Watch</a>`); line.lastChild.href = r.u; }
   cell.appendChild(line);
   if (!g.platformer) cell.insertAdjacentHTML("beforeend", `<div class="bar ${cls}"><i style="left:${r.s}%;width:${Math.max(1, r.e - r.s)}%"></i></div>`);
 }
