@@ -366,6 +366,12 @@ td.act { width: 110px; text-align: right; white-space: nowrap; }
 .delrun svg { width: 14px; height: 14px; }
 .watch svg { width: 11px; height: 11px; }
 .nolink { color: var(--faint); font-size: 13px; }
+.novod { display: inline-flex; align-items: center; gap: 5px; color: var(--faint); font-size: 13px; cursor: help; white-space: nowrap; }
+.novod svg { width: 13px; height: 13px; opacity: .8; }
+.novod:hover, .novod:focus { color: var(--muted); outline: none; }
+.vodnote { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 14px; padding: 12px 14px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); color: var(--muted); font-size: 14px; }
+.vodnote svg { flex: none; width: 16px; height: 16px; margin-top: 2px; color: var(--faint); }
+.vodnote b { color: var(--text); font-weight: 600; }
 input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); cursor: pointer; vertical-align: middle; }
 .empty { padding: 48px 20px; text-align: center; color: var(--muted); }
 
@@ -595,6 +601,8 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
       <div class="stats" id="stats"></div>
     </section>
 
+    <div class="vodnote" id="vodNote" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.5h.01"/></svg><span id="vodNoteText"></span></div>
+
     <section class="card">
       <div class="toolbar">
         <div class="select small"><select id="sort">
@@ -661,6 +669,8 @@ const TOKEN_KEY = "vodtracker-gist-token";
 // The Discord webhook itself is kept inside the Worker.
 const REPORT_URL = "https://gd-rewind-report.cloudflarerewind.workers.dev/";
 const TRASH_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>';
+// Shown instead of Watch when a run has no VOD. Almost always because they weren't streaming.
+const NO_VOD = '<span class="novod" tabindex="0" title="No VOD for this run. They probably weren\'t live, or their Twitch doesn\'t save past broadcasts.">Not live<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 7.5h.01"/></svg></span>';
 const PLAY_ICON = '<svg viewBox="0 0 10 10"><path d="M2 1l7 4-7 4z" fill="currentColor"/></svg>';
 
 const $ = id => document.getElementById(id);
@@ -1235,7 +1245,7 @@ function topCard({ l, s, r, info, score }, i) {
     <button class="who"><span class="nm"></span></button>
     <div class="trun ${r.c ? "done" : ""}"></div>
     ${l.platformer ? "" : `<div class="bar ${r.c ? "done" : ""}"><i style="left:${r.s}%;width:${Math.max(1, r.e - r.s)}%"></i></div>`}
-    <div class="tfoot"><span class="num"></span>${r.u ? `<a class="watch" target="_blank" rel="noopener">${PLAY_ICON}Watch</a>` : '<span class="nolink">No VOD</span>'}</div>`;
+    <div class="tfoot"><span class="num"></span>${r.u ? `<a class="watch" target="_blank" rel="noopener">${PLAY_ICON}Watch</a>` : NO_VOD}</div>`;
   c.querySelector(".lvl").textContent = l.level || l.key;
   c.querySelector(".lvl").onclick = () => goLevel(groupKeyOf(l));
   const strip = stripEl(groupOf(l));
@@ -1684,7 +1694,7 @@ function renderBestRuns(g) {
     row.querySelector(".when").textContent = `${dayLabel(r.t)}${r.u ? ` · ${clock(r.o)} in` : ""}`;
     const act = row.querySelector(".act");
     if (r.u) { act.innerHTML = `<a class="watch" target="_blank" rel="noopener">${PLAY_ICON}Watch</a>`; act.firstChild.href = r.u; }
-    else act.innerHTML = '<span class="nolink">No VOD</span>';
+    else act.innerHTML = NO_VOD;
     box.appendChild(row);
   });
   $("brMore").style.display = list.length > brLimit ? "" : "none";
@@ -1735,12 +1745,12 @@ function render() {
   const attempts = l => l.sessions.reduce((n, s) => n + s.runs.length, 0);
   const mine = levels.filter(l => l.streamer === streamer).sort((a, b) => attempts(b) - attempts(a) || b.updated - a.updated);
   if (!mine.some(l => l.key === levelKey)) levelKey = mine[0].key;
-  fillSelect($("levelSel"), mine.map(l => [l.key, `${l.level} · ${attempts(l)} attempts`]), levelKey);
+  fillSelect($("levelSel"), mine.map(l => [l.key, `${l.level} · ${plural(attempts(l), "attempt")}`]), levelKey);
 
   const lvl = currentLevel();
   const sessions = [...lvl.sessions].sort((a, b) => b.id - a.id);
   if (!sessions.some(s => s.id === sessionId)) sessionId = sessions[0].id;
-  fillSelect($("sessionSel"), sessions.map(s => [s.id, `${when(s.started)} · ${s.runs.length} attempts`]), sessionId);
+  fillSelect($("sessionSel"), sessions.map(s => [s.id, `${when(s.started)} · ${plural(s.runs.length, "attempt")}`]), sessionId);
   $("pickers").style.display = "";
 
   showSession();
@@ -1795,6 +1805,14 @@ function renderStats() {
   // Noclip runs don't count toward real stats
   const runs = D.runs.filter(r => !r.nc);
   const linked = runs.filter(r => r.u).length;
+  // Nothing in this session links to a VOD: say why once, instead of only "Not live" on every row
+  const note = $("vodNote");
+  note.style.display = runs.length && !linked ? "" : "none";
+  if (!linked) {
+    const t = $("vodNoteText");
+    t.innerHTML = "<b>No VODs for this session.</b> ";
+    t.append(`${streamer} probably wasn't live while playing, so there's nothing to watch. Runs show up with a Watch button when they're played on stream.`);
+  }
   let stats;
   if (D.platformer) {
     stats = [["Attempts", runs.length], ["Completions", runs.filter(r => r.c).length],
@@ -1877,7 +1895,7 @@ function renderRows() {
       <td class="num">#${r.n}</td>
       <td><div class="run ${cls}"><span class="lbl"></span></div>${D.platformer ? "" : `<div class="bar ${cls}"><i style="left:${r.s}%;width:${Math.max(1, r.e - r.s)}%"></i></div>`}</td>
       <td class="time">${r.u ? clock(r.o) : '<span class="nolink">-</span>'}</td>
-      <td class="act">${r.u ? `<a class="watch" target="_blank" rel="noopener">${PLAY_ICON}Watch</a>` : '<span class="nolink">No VOD</span>'}${editMode ? `<button class="delrun" title="Delete this run">${TRASH_ICON}</button>` : ""}</td>`;
+      <td class="act">${r.u ? `<a class="watch" target="_blank" rel="noopener">${PLAY_ICON}Watch</a>` : NO_VOD}${editMode ? `<button class="delrun" title="Delete this run">${TRASH_ICON}</button>` : ""}</td>`;
     tr.querySelector(".lbl").textContent = label(r);
     const run = tr.querySelector(".run");
     if (r.nc) run.insertAdjacentHTML("beforeend", `<span class="tag nc">${noclipText(r)}</span>`);
