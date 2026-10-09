@@ -397,6 +397,26 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
 .hiddenlist .kind.on { color: var(--green); background: var(--green-soft); }
 .hiddenlist .kind { font-size: 11px; font-weight: 600; color: var(--muted); background: var(--surface-2); border-radius: 6px; padding: 2px 7px; margin-right: 8px; }
 
+/* What's new */
+.news-btn[hidden], .news-pill[hidden], .news-more[hidden] { display: none; }
+.news-btn { position: relative; }
+.news-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--bg); }
+.news-pill { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; margin: 0 0 18px; padding: 5px 10px 5px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); font: inherit; font-size: 13px; cursor: pointer; }
+.news-pill:hover { border-color: var(--border-strong); color: var(--text); }
+.news-pill b { flex: none; color: var(--accent-text); font-weight: 600; }
+.news-pill span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.news-pill svg { flex: none; width: 14px; height: 14px; }
+.news { width: min(560px, calc(100vw - 28px)); }
+.news-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.news-list { max-height: min(60vh, 520px); overflow-y: auto; margin: 0 -4px; padding: 0 4px; }
+.news-day + .news-day { margin-top: 18px; }
+.news-day h3 { margin: 0 0 8px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.news-day ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.news-day li { display: flex; align-items: baseline; gap: 10px; font-size: 14px; line-height: 1.45; }
+.ntag { flex: none; min-width: 34px; text-align: center; font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-text); }
+.ntag.mod { background: var(--surface-2); color: var(--muted); }
+.news-more { margin-top: 14px; width: 100%; justify-content: center; }
+
 /* Report a bug or send feedback */
 .report { width: min(460px, calc(100vw - 28px)); padding: 20px; border-radius: var(--radius); border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); box-shadow: 0 8px 30px rgba(16,16,24,.25); }
 .report::backdrop { background: rgba(0, 0, 0, .55); }
@@ -477,6 +497,10 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
         <a href="https://ko-fi.com/megeli" target="_blank" rel="noopener"><b>megeli</b><span>ko-fi.com/megeli</span></a>
       </div>
       </div>
+      <button class="btn icon news-btn" id="newsBtn" title="What's new" aria-label="What's new" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/></svg>
+        <span class="news-dot" id="newsDot" hidden></span>
+      </button>
       <button class="btn icon" id="refresh" title="Refresh">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
       </button>
@@ -508,6 +532,7 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
 
   <section class="home" id="home" style="display:none">
     <div class="home-hero">
+      <button class="news-pill" id="newsPill" type="button" hidden><b id="newsPillWhen"></b><span id="newsPillText"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
       <h1>Find any run from a GD stream</h1>
       <p class="lead">Pick a streamer or level, then click Watch to open the VOD where that attempt started.</p>
     </div>
@@ -641,6 +666,16 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
 </div>
 <div class="toast" id="toast"></div>
 <div class="tip" id="tip" role="tooltip" hidden></div>
+
+<dialog class="report news" id="newsDialog">
+  <div class="news-head">
+    <h2>What's new</h2>
+    <button class="btn icon" id="newsClose" type="button" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <p>Changes to the site and the mod, by day.</p>
+  <div class="news-list" id="newsList"></div>
+  <button class="btn news-more" id="newsMore" type="button" hidden>Show older</button>
+</dialog>
 
 <dialog class="report" id="reportDialog">
   <h2>Report a bug or send feedback</h2>
@@ -2068,6 +2103,91 @@ $("reportBtn").onclick = () => {
   $("reportText").focus();
 };
 $("reportCancel").onclick = () => $("reportDialog").close();
+
+// ---- What's new: changelog.json in this repo, one entry per day (newest first)
+const NEWS_KEY = "vodtracker-news-seen";
+let news = [], newsShown = 5;
+const newsDate = d => { const [y, m, dd] = d.split("-").map(Number); return new Date(y, m - 1, dd); };
+const newsShort = d => newsDate(d).toLocaleDateString([], { month: "short", day: "numeric" });
+function newsAgo(d) {
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  return Math.round((today - newsDate(d)) / 86400000);
+}
+function newsDayLabel(d) {
+  const ago = newsAgo(d);
+  if (ago === 0) return `Today · ${newsShort(d)}`;
+  if (ago === 1) return `Yesterday · ${newsShort(d)}`;
+  return newsDate(d).toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
+}
+const newsSeen = () => { try { return localStorage.getItem(NEWS_KEY) || ""; } catch { return ""; } };
+
+async function loadNews() {
+  try {
+    const res = await fetch("changelog.json", { cache: "no-cache" });
+    if (!res.ok) return;
+    const list = await res.json();
+    news = (Array.isArray(list) ? list : [])
+      .filter(d => d && /^\d{4}-\d{2}-\d{2}$/.test(d.date) && Array.isArray(d.items) && d.items.length)
+      .sort((a, b) => b.date.localeCompare(a.date));
+  } catch { return; }
+  if (!news.length) return;
+  $("newsBtn").hidden = false;
+  // A dot on the button until they've opened the newest day
+  $("newsDot").hidden = news[0].date <= newsSeen();
+  // On the home page, a short line above the title for the last few days
+  const ago = newsAgo(news[0].date);
+  if (ago <= 3) {
+    $("newsPillWhen").textContent = ago === 0 ? "New today" : ago === 1 ? "New yesterday" : `New ${newsShort(news[0].date)}`;
+    $("newsPillText").textContent = news[0].items[0].text;
+    $("newsPill").title = news[0].items[0].text;
+    $("newsPill").hidden = false;
+  }
+}
+
+function renderNews() {
+  const box = $("newsList");
+  box.innerHTML = "";
+  for (const day of news.slice(0, newsShown)) {
+    const d = document.createElement("div");
+    d.className = "news-day";
+    const h = document.createElement("h3");
+    h.textContent = newsDayLabel(day.date);
+    const ul = document.createElement("ul");
+    for (const it of day.items) {
+      const li = document.createElement("li");
+      const tag = document.createElement("span");
+      tag.className = "ntag" + (it.tag === "Mod" ? " mod" : "");
+      tag.textContent = it.tag || "Site";
+      const t = document.createElement("span");
+      t.textContent = it.text;
+      li.append(tag, t);
+      ul.appendChild(li);
+    }
+    d.append(h, ul);
+    box.appendChild(d);
+  }
+  $("newsMore").hidden = news.length <= newsShown;
+}
+
+function openNews() {
+  if (!news.length) return;
+  newsShown = 5;
+  renderNews();
+  $("newsList").scrollTop = 0;
+  $("newsDialog").showModal();
+  try { localStorage.setItem(NEWS_KEY, news[0].date); } catch { }
+  $("newsDot").hidden = true;
+}
+$("newsBtn").onclick = openNews;
+$("newsPill").onclick = openNews;
+$("newsClose").onclick = () => $("newsDialog").close();
+$("newsMore").onclick = () => { newsShown += 7; renderNews(); };
+// Clicking outside the box closes it
+$("newsDialog").addEventListener("click", e => {
+  const r = $("newsDialog").getBoundingClientRect();
+  if (e.target === $("newsDialog") && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom)) $("newsDialog").close();
+});
+loadNews();
 
 $("reportForm").onsubmit = async e => {
   e.preventDefault();

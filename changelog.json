@@ -1,0 +1,96 @@
+[
+  {
+    "date": "2026-10-09",
+    "items": [
+      {
+        "tag": "Site",
+        "text": "What's new: the star button in the header shows what changed each day"
+      },
+      {
+        "tag": "Site",
+        "text": "Streamer pages have an All time option in the Session dropdown, so you can see someone's best runs on a level across every session"
+      },
+      {
+        "tag": "Site",
+        "text": "Best first sorts by how long the run was. Completions like 85%-100% don't jump ahead of longer runs anymore"
+      },
+      {
+        "tag": "Site",
+        "text": "The Linked to VOD stat is now On stream / off stream"
+      },
+      {
+        "tag": "Site",
+        "text": "Runs without a VOD say Not live, with a note explaining the streamer probably wasn't streaming"
+      },
+      {
+        "tag": "Site",
+        "text": "Streamer pages open on the level they played last, and the level list can be sorted by Recent or Most attempts"
+      },
+      {
+        "tag": "Site",
+        "text": "Level pages: every level with its startpos copies, its AREDL rank, creators and verifier, who beat it and the best runs"
+      },
+      {
+        "tag": "Site",
+        "text": "Clicking a level name in a session opens its level page, and practice runs show up there too"
+      },
+      {
+        "tag": "Site",
+        "text": "New home page with the top runs of the week ranked by the AREDL, completions and levels"
+      },
+      {
+        "tag": "Site",
+        "text": "AREDL thumbnails on level cards, search results, level pages and sessions"
+      },
+      {
+        "tag": "Mod",
+        "text": "v1.0.5: the mod doesn't save or upload in the middle of an attempt anymore. It waits until you die or pause, so it can't cause lag"
+      },
+      {
+        "tag": "Mod",
+        "text": "v1.0.5: keeps 50 sessions per level instead of 20"
+      },
+      {
+        "tag": "Mod",
+        "text": "v1.0.4: updates itself when you open GD"
+      },
+      {
+        "tag": "Mod",
+        "text": "v1.0.3: hide a level from the website while it keeps tracking. Showing it again uploads everything"
+      },
+      {
+        "tag": "Mod",
+        "text": "v1.0.3: a new session starts after 30 minutes away from a level instead of 120"
+      }
+    ]
+  },
+  {
+    "date": "2026-10-08",
+    "items": [
+      {
+        "tag": "Site",
+        "text": "Noclip runs show under their own Noclip tab with their accuracy and deaths"
+      },
+      {
+        "tag": "Site",
+        "text": "Report bug button in the header for bugs and feedback"
+      },
+      {
+        "tag": "Site",
+        "text": "Pages load from a cache, so updates don't get paused by GitHub's limits"
+      },
+      {
+        "tag": "Site",
+        "text": "Link previews when the site is shared on Discord or X"
+      },
+      {
+        "tag": "Site",
+        "text": "New GD Rewind logo"
+      },
+      {
+        "tag": "Mod",
+        "text": "Noclip runs are saved with their accuracy and death count, and kept out of normal stats"
+      }
+    ]
+  }
+]
