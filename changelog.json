@@ -4,6 +4,10 @@
     "items": [
       {
         "tag": "Site",
+        "text": "Fewer buttons in the header. The site is dark mode only now"
+      },
+      {
+        "tag": "Site",
         "text": "X button in the header that opens the GD Rewind account (x.com/GDRewind)"
       },
       {
