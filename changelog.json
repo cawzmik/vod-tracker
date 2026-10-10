@@ -3,6 +3,10 @@
     "date": "2026-10-09",
     "items": [
       {
+        "tag": "Mod",
+        "text": "v1.0.7: uploads every 3 minutes while playing instead of every minute, and waits after a failed upload, so lots of people playing at once doesn't stop uploads for everyone"
+      },
+      {
         "tag": "Site",
         "text": "Streamer pages have a Watch button next to Share while they're live, which opens their Twitch channel"
       },
