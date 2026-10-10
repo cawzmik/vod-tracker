@@ -4,6 +4,18 @@
     "items": [
       {
         "tag": "Site",
+        "text": "Streamer names are shown the way they're meant to look, like Trick, Brian Cheese and TophShaw"
+      },
+      {
+        "tag": "Mod",
+        "text": "v1.0.6: Level Whitelist (off by default). Turn it on in the mod settings and only the levels you add get tracked, including your own copies"
+      },
+      {
+        "tag": "Mod",
+        "text": "v1.0.6: when an update finishes downloading, a popup in the menu lets you restart GD right away"
+      },
+      {
+        "tag": "Site",
         "text": "Top runs scoring favors the top of the AREDL a lot more, so 23% on GRIEF beats 58% on Slaughterhouse"
       },
       {

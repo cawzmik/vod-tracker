@@ -757,6 +757,20 @@ let editMode = false;
 const selected = new Set();
 let D = null; // the session being shown
 
+// Names shown on the site. Uploads, links (?streamer=) and edit mode keep the
+// Twitch login; this only changes what people read. Anyone not listed gets a
+// capital first letter (doggie shows as Doggie).
+const DISPLAY_NAMES = {
+  technicaljl: "Technical",
+  brian_cheese: "Brian Cheese",
+  trickgmd: "Trick",
+  conix: "Conix",
+  isbro0k: "Brook",
+  tophshaw: "TophShaw",
+  dylanshand: "DylanShand",
+};
+const dn = login => !login ? login : DISPLAY_NAMES[login] || login.charAt(0).toUpperCase() + login.slice(1);
+
 const levelTag = l => `${l.streamer}--${l.key}`;
 const sessionTag = (l, s) => `${l.streamer}--${l.key}--${s.id}`;
 const runTag = (l, s, n) => `${l.streamer}--${l.key}--${s.id}--${n}`;
@@ -902,7 +916,7 @@ function avatarEl(name) {
   const fallbackLetter = () => {
     const d = document.createElement("span");
     d.className = "avatar";
-    d.textContent = (name[0] || "?").toUpperCase();
+    d.textContent = ((dn(name) || "")[0] || "?").toUpperCase();
     return d;
   };
   if (name === "older uploads") return fallbackLetter();
@@ -927,7 +941,7 @@ function renderStreamers(names) {
     b.className = "streamer" + (name === streamer ? " on" : "");
     b.appendChild(avatarEl(name));
     const label = document.createElement("span");
-    label.textContent = name;
+    label.textContent = dn(name);
     b.appendChild(label);
     if (levels.some(l => l.streamer === name && isLive(l))) {
       const dot = document.createElement("span"); dot.className = "dot"; dot.title = "Playing now"; b.appendChild(dot);
@@ -1041,7 +1055,7 @@ function renderHome() {
     b.appendChild(avatarEl(it.name));
     const text = document.createElement("div");
     text.innerHTML = '<div class="name"></div><div class="meta"></div>';
-    text.querySelector(".name").textContent = it.name;
+    text.querySelector(".name").textContent = dn(it.name);
     if (it.live) text.querySelector(".name").insertAdjacentHTML("beforeend", '<span class="live">Playing now</span>');
     text.querySelector(".meta").textContent = it.guest
       ? `${it.levels} ${it.levels === 1 ? "level" : "levels"} · removed in ${hoursLeft(it.name)}h`
@@ -1091,12 +1105,14 @@ function searchResults(q) {
   q = q.trim().toLowerCase();
   if (!q) return [];
   const rank = text => text.startsWith(q) ? 0 : 1;
-  const people = streamerNames().filter(n => n.includes(q))
-    .sort((a, b) => rank(a) - rank(b) || a.localeCompare(b)).slice(0, 5)
+  // Matches the login or the shown name ("trick" and "trickgmd" both find trickgmd)
+  const nameRank = n => Math.min(rank(n), rank(dn(n).toLowerCase()));
+  const people = streamerNames().filter(n => n.includes(q) || dn(n).toLowerCase().includes(q))
+    .sort((a, b) => nameRank(a) - nameRank(b) || a.localeCompare(b)).slice(0, 5)
     .map(name => {
       const mine = levels.filter(l => l.streamer === name);
       const meta = mine.some(isLive) ? "Playing now" : isGuest(name) ? "Guest" : `${mine.length} ${mine.length === 1 ? "level" : "levels"}`;
-      return { type: "streamer", name, meta, go: () => go(name) };
+      return { type: "streamer", name, label: dn(name), meta, go: () => go(name) };
     });
   const lvls = findGroups(q)
     .sort((a, b) => rank(a.key) - rank(b.key) || groupStats(b).attempts - groupStats(a).attempts).slice(0, 8)
@@ -1137,7 +1153,7 @@ function makeSearch(input, box, button) {
       const t = document.createElement("span");
       t.className = "rtext";
       t.innerHTML = "<b></b><span></span>";
-      t.querySelector("b").textContent = it.name;
+      t.querySelector("b").textContent = it.label || it.name;
       t.querySelector("span").textContent = it.meta;
       b.appendChild(t);
       b.onmousedown = e => e.preventDefault();
@@ -1187,8 +1203,8 @@ function renderFeatures() {
   $("liveCount").hidden = !live.length;
   $("liveCount").textContent = live.length;
   $("liveText").textContent = !loaded ? "Streamers who are live and playing with the mod."
-    : live.length === 1 ? `${live[0]} is playing with the mod right now.`
-    : live.length ? `${live.join(", ")} are playing with the mod right now.`
+    : live.length === 1 ? `${dn(live[0])} is playing with the mod right now.`
+    : live.length ? `${live.map(dn).join(", ")} are playing with the mod right now.`
     : "Nobody is playing right now. Live streamers show up here.";
 }
 const scrollToEl = id => $(id).scrollIntoView({ behavior: "smooth", block: "start" });
@@ -1319,7 +1335,7 @@ function topCard({ l, s, r, info, score, copy }, i) {
   c.insertBefore(strip, c.firstChild);
   const who = c.querySelector(".who");
   who.insertBefore(avatarEl(l.streamer), who.firstChild);
-  who.querySelector(".nm").textContent = l.streamer;
+  who.querySelector(".nm").textContent = dn(l.streamer);
   who.onclick = () => go(l.streamer);
   const run = c.querySelector(".trun");
   if (l.platformer) run.textContent = `Beat it in ${clock(r.d)}`;
@@ -1566,8 +1582,8 @@ function levelCard(g) {
   const copies = g.members.filter(m => m.copy).length;
   b.querySelector(".meta").textContent = `${plural(st.people.length, "streamer")} · ${plural(st.attempts, "attempt")}${copies ? ` · ${plural(copies, "copy")}`.replace("copys", "copies") : ""}`;
   const best = b.querySelector(".best");
-  if (st.beaten.length) { best.classList.add("win"); best.textContent = `Beaten by ${st.beaten.map(p => p.name).join(", ")}`; }
-  else if (st.best) best.textContent = `Best: ${runText(g, st.best.best0.r)} by ${st.best.name}`;
+  if (st.beaten.length) { best.classList.add("win"); best.textContent = `Beaten by ${st.beaten.map(p => dn(p.name)).join(", ")}`; }
+  else if (st.best) best.textContent = `Best: ${runText(g, st.best.best0.r)} by ${dn(st.best.name)}`;
   else best.textContent = "No runs from 0% yet";
   b.onclick = () => goLevel(g.key);
   return b;
@@ -1611,8 +1627,8 @@ function renderLevel() {
   const tiles = [
     ["Attempts", st.attempts.toLocaleString()],
     ["Streamers", st.people.length],
-    ["Beaten by", st.beaten.length ? st.beaten.map(p => p.name).join(", ") : "Nobody yet"],
-    [g.platformer ? "Best" : "Best from 0%", best ? `${g.platformer ? runText(g, best.best0.r) : best.best0.r.e + "%"} · ${best.name}` : "-"],
+    ["Beaten by", st.beaten.length ? st.beaten.map(p => dn(p.name)).join(", ") : "Nobody yet"],
+    [g.platformer ? "Best" : "Best from 0%", best ? `${g.platformer ? runText(g, best.best0.r) : best.best0.r.e + "%"} · ${dn(best.name)}` : "-"],
   ];
   $("lvStats").innerHTML = "";
   for (const [k, v] of tiles) {
@@ -1635,7 +1651,7 @@ function renderLevel() {
       <span class="att"></span>`;
     const who = row.querySelector(".who");
     who.insertBefore(avatarEl(p.name), who.firstChild);
-    who.querySelector(".nm").textContent = p.name;
+    who.querySelector(".nm").textContent = dn(p.name);
     who.onclick = () => go(p.name, p.main.key);
     row.querySelector(".att").textContent = p.attempts.toLocaleString();
     runCell(row.querySelector(".c0"), g, p.best0, p.beat, true, true);
@@ -1770,7 +1786,7 @@ function renderBestRuns(g) {
       <div class="cell"></div><span class="when"></span><span class="act"></span>`;
     const who = row.querySelector(".who");
     who.insertBefore(avatarEl(it.l.streamer), who.firstChild);
-    who.querySelector(".nm").textContent = it.l.streamer;
+    who.querySelector(".nm").textContent = dn(it.l.streamer);
     who.onclick = () => go(it.l.streamer, it.l.key, it.s.id);
     runCell(row.querySelector(".cell"), g, it, null, false, brMode === "zero");
     row.querySelector(".when").textContent = `${dayLabel(r.t)}${r.u ? ` · ${clock(r.o)} in` : ""}`;
@@ -1807,7 +1823,7 @@ function render() {
   if (levelPage) return renderLevel();
   if (!streamer) return renderHome();
   setView("streamer");
-  document.title = `${streamer} · GD Rewind`;
+  document.title = `${dn(streamer)} · GD Rewind`;
   if (!loaded) {
     $("pickers").style.display = "none";
     if (loadError) showNotice(loadError);
@@ -1899,7 +1915,7 @@ function showSession() {
   if (live) $("title").insertAdjacentHTML("beforeend", '<span class="live">Playing now</span>');
   const date = new Date(D.started * 1000).toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
   const since = new Date(D.started * 1000).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
-  $("sub").textContent = (D.all ? `${streamer} · All time · ${plural(D.count, "session")} since ${since}` : `${streamer} · ${date} · ${dur(D.last - D.started)} session`)
+  $("sub").textContent = (D.all ? `${dn(streamer)} · All time · ${plural(D.count, "session")} since ${since}` : `${dn(streamer)} · ${date} · ${dur(D.last - D.started)} session`)
     + (isGuest(streamer) ? ` · Guest, removed in ${hoursLeft(streamer)}h` : "");
 
   renderStats();
@@ -1923,7 +1939,7 @@ function renderStats() {
   if (!linked) {
     const t = $("vodNoteText");
     t.innerHTML = D.all ? "<b>No VODs for this level.</b> " : "<b>No VODs for this session.</b> ";
-    t.append(`${streamer} probably wasn't live while playing, so there's nothing to watch. Runs show up with a Watch button when they're played on stream.`);
+    t.append(`${dn(streamer)} probably wasn't live while playing, so there's nothing to watch. Runs show up with a Watch button when they're played on stream.`);
   }
   // Runs with a VOD were played on stream, the rest weren't
   const off = runs.length - linked;
