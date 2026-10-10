@@ -275,6 +275,8 @@ a.btn { color: inherit; text-decoration: none; }
 .lcard .meta { font-size: 13px; color: var(--muted); }
 .lcard .best { font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lcard .best.win { color: var(--green); }
+.listpos.proj { color: #f0aa3c; background: rgba(240, 170, 60, .14); }
+h1 .listpos.proj { font-size: 12px; letter-spacing: 0; }
 .unranked { font-size: 12px; font-weight: 600; color: var(--muted); background: var(--surface-2); padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
 
 /* Level page */
@@ -864,6 +866,13 @@ const dn = login => !login ? login : DISPLAY_NAMES[login] || login.charAt(0).toU
 const LEVEL_NAMES = [
   [/^sweeping\s*demon\b/i, "Sweeping Demon II"],
 ];
+// A short label for levels that aren't on the AREDL yet, by the shown name
+const LEVEL_NOTES = {
+  "sweeping demon ii": "Projected top 1",
+};
+const levelNote = name => LEVEL_NOTES[String(name || "").toLowerCase().replace(/\s*\(copy\)$/, "").trim()] || "";
+const noteTag = name => { const n = levelNote(name); return n ? `<span class="listpos proj">${n}</span>` : ""; };
+
 function fixedLevelName(name) {
   const raw = String(name || "");
   for (const [re, fixed] of LEVEL_NAMES) {
@@ -1257,7 +1266,7 @@ function searchResults(q) {
     .sort((a, b) => rank(a.key) - rank(b.key) || groupStats(b).attempts - groupStats(a).attempts).slice(0, 8)
     .map(g => {
       const st = groupStats(g);
-      return { type: "level", g, name: g.name, meta: `${g.info ? `AREDL #${g.info[0]} · ` : ""}${plural(st.people.length, "streamer")} · ${plural(st.attempts, "attempt")}`, go: () => goLevel(g.key) };
+      return { type: "level", g, name: g.name, meta: `${g.info ? `AREDL #${g.info[0]} · ` : levelNote(g.name) ? `${levelNote(g.name)} · ` : ""}${plural(st.people.length, "streamer")} · ${plural(st.attempts, "attempt")}`, go: () => goLevel(g.key) };
     });
   return [...people, ...lvls];
 }
@@ -1715,7 +1724,7 @@ function levelCard(g) {
   const st = groupStats(g);
   const b = document.createElement("button");
   b.className = "lcard";
-  b.innerHTML = `<span class="ph"></span><div class="top"><span class="nm"></span>${g.info ? `<span class="listpos">AREDL #${g.info[0]}</span>` : '<span class="unranked">Not on the AREDL</span>'}</div><div class="meta"></div><div class="best"></div>`;
+  b.innerHTML = `<span class="ph"></span><div class="top"><span class="nm"></span>${g.info ? `<span class="listpos">AREDL #${g.info[0]}</span>` : noteTag(g.name) || '<span class="unranked">Not on the AREDL</span>'}</div><div class="meta"></div><div class="best"></div>`;
   b.querySelector(".nm").textContent = g.name;
   b.querySelector(".ph").replaceWith(stripEl(g));
   const copies = g.members.filter(m => m.copy).length;
@@ -1752,6 +1761,7 @@ function renderLevel() {
   const st = groupStats(g);
   const title = $("lvTitle");
   title.textContent = g.name;
+  if (!g.info) title.insertAdjacentHTML("beforeend", noteTag(g.name));
   if (nowS() - st.last < 10 * 60) title.insertAdjacentHTML("beforeend", '<span class="live">Playing now</span>');
   const rank = $("lvRank");
   rank.style.display = g.info ? "" : "none";
@@ -1837,7 +1847,7 @@ function renderCredits(g) {
   }
   sub.textContent = "";
   if (!c || c === "loading") {
-    sub.textContent = c === "loading" ? " " : (g.platformer ? "Platformer level" : g.info ? "" : "Not on the AREDL");
+    sub.textContent = c === "loading" ? " " : (g.platformer ? "Platformer level" : g.info ? "" : levelNote(g.name) ? "Being verified, not on the AREDL yet" : "Not on the AREDL");
     return;
   }
   if (c.publisher) {
@@ -1863,7 +1873,7 @@ function renderCredits(g) {
       sub.appendChild(a);
     } else sub.append(c.verifier);
   }
-  if (!c.publisher && !c.verifier) sub.textContent = g.info ? "" : "Not on the AREDL";
+  if (!c.publisher && !c.verifier) sub.textContent = g.info ? "" : levelNote(g.name) ? "Being verified, not on the AREDL yet" : "Not on the AREDL";
 }
 
 // ---- best runs on a level, everyone mixed together
@@ -2051,6 +2061,7 @@ function showSession() {
     goLevel(groupKeyOf(lvl));
   };
   $("title").appendChild(lvlLink);
+  if (!groupOf(lvl)?.info) $("title").insertAdjacentHTML("beforeend", noteTag(D.level));
   if (live) $("title").insertAdjacentHTML("beforeend", '<span class="live">Playing now</span>');
   // Watch opens their Twitch channel while they're live: playing right now,
   // and their newest run is linked to a VOD (so they're on stream)
