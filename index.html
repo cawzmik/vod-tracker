@@ -409,14 +409,9 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
 .hiddenlist .kind { font-size: 11px; font-weight: 600; color: var(--muted); background: var(--surface-2); border-radius: 6px; padding: 2px 7px; margin-right: 8px; }
 
 /* What's new */
-.news-btn[hidden], .news-pill[hidden], .news-more[hidden] { display: none; }
+.news-btn[hidden], .news-more[hidden] { display: none; }
 .news-btn { position: relative; }
 .news-dot { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--bg); }
-.news-pill { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; margin: 0 0 18px; padding: 5px 10px 5px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); font: inherit; font-size: 13px; cursor: pointer; }
-.news-pill:hover { border-color: var(--border-strong); color: var(--text); }
-.news-pill b { flex: none; color: var(--accent-text); font-weight: 600; }
-.news-pill span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.news-pill svg { flex: none; width: 14px; height: 14px; }
 .news { width: min(560px, calc(100vw - 28px)); }
 .news-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .news-list { max-height: min(60vh, 520px); overflow-y: auto; margin: 0 -4px; padding: 0 4px; }
@@ -544,7 +539,6 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
 
   <section class="home" id="home" style="display:none">
     <div class="home-hero">
-      <button class="news-pill" id="newsPill" type="button" hidden><b id="newsPillWhen"></b><span id="newsPillText"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
       <h1>Find any run from a GD stream</h1>
       <p class="lead">Pick a streamer or level, then click Watch to open the VOD where that attempt started.</p>
     </div>
@@ -2208,14 +2202,6 @@ async function loadNews() {
   $("newsBtn").hidden = false;
   // A dot on the button until they've opened the newest day
   $("newsDot").hidden = news[0].date <= newsSeen();
-  // On the home page, a short line above the title for the last few days
-  const ago = newsAgo(news[0].date);
-  if (ago <= 3) {
-    $("newsPillWhen").textContent = ago === 0 ? "New today" : ago === 1 ? "New yesterday" : `New ${newsShort(news[0].date)}`;
-    $("newsPillText").textContent = news[0].items[0].text;
-    $("newsPill").title = news[0].items[0].text;
-    $("newsPill").hidden = false;
-  }
 }
 
 function renderNews() {
@@ -2253,7 +2239,6 @@ function openNews() {
   $("newsDot").hidden = true;
 }
 $("newsBtn").onclick = openNews;
-$("newsPill").onclick = openNews;
 $("newsClose").onclick = () => $("newsDialog").close();
 $("newsMore").onclick = () => { newsShown += 7; renderNews(); };
 // Clicking outside the box closes it
