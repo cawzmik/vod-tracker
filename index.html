@@ -858,6 +858,21 @@ const DISPLAY_NAMES = {
 };
 const dn = login => !login ? login : DISPLAY_NAMES[login] || login.charAt(0).toUpperCase() + login.slice(1);
 
+// Level names fixed on the site, for levels a streamer keeps renaming. Any
+// level whose name starts with the pattern shows with the fixed name, so all
+// the versions land on one level page. Copies keep counting as copies.
+const LEVEL_NAMES = [
+  [/^sweeping\s*demon\b/i, "Sweeping Demon II"],
+];
+function fixedLevelName(name) {
+  const raw = String(name || "");
+  for (const [re, fixed] of LEVEL_NAMES) {
+    const { base, copy } = splitName(raw);
+    if (re.test(base) || re.test(raw)) return copy ? `${fixed} (copy)` : fixed;
+  }
+  return raw;
+}
+
 const levelTag = l => `${l.streamer}--${l.key}`;
 const sessionTag = (l, s) => `${l.streamer}--${l.key}--${s.id}`;
 const runTag = (l, s, n) => `${l.streamer}--${l.key}--${s.id}--${n}`;
@@ -951,6 +966,7 @@ async function load() {
       try {
         const data = JSON.parse(text);
         data.filename = file.filename;
+        if (data.level) data.level = fixedLevelName(data.level);
         // Files are "<streamer>--<level>.json". Older uploads had no streamer.
         const cut = file.filename.indexOf("--");
         data.streamer = (data.streamer || (cut > 0 ? file.filename.slice(0, cut) : "older uploads")).toLowerCase();
