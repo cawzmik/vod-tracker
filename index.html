@@ -868,7 +868,7 @@ const LEVEL_NAMES = [
 ];
 // A short label for levels that aren't on the AREDL yet, by the shown name
 const LEVEL_NOTES = {
-  "sweeping demon ii": "Projected top 1",
+  "sweeping demon ii": "Projected Top 1",
 };
 const levelNote = name => LEVEL_NOTES[String(name || "").toLowerCase().replace(/\s*\(copy\)$/, "").trim()] || "";
 const noteTag = name => { const n = levelNote(name); return n ? `<span class="listpos proj">${n}</span>` : ""; };
