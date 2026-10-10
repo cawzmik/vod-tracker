@@ -4,6 +4,10 @@
     "items": [
       {
         "tag": "Site",
+        "text": "X button in the header that opens the GD Rewind account (x.com/GDRewind)"
+      },
+      {
+        "tag": "Site",
         "text": "Phones: the home page is about half as long. Streamers and levels show two per row, the three shortcut cards fit on one row, and Top runs can be swiped sideways"
       },
       {
