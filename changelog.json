@@ -4,6 +4,10 @@
     "items": [
       {
         "tag": "Site",
+        "text": "Streamer pages have a Watch button next to Share while they're live, which opens their Twitch channel"
+      },
+      {
+        "tag": "Site",
         "text": "Streamer names are shown the way they're meant to look, like Trick, Brian Cheese and TophShaw"
       },
       {
