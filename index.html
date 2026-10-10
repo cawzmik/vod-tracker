@@ -385,6 +385,10 @@ td.act { width: 110px; text-align: right; white-space: nowrap; }
 /* Small tooltip for "Not live", placed next to the label and kept on screen */
 .tip { position: fixed; z-index: 20; max-width: 240px; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); font-size: 13px; line-height: 1.45; box-shadow: 0 8px 24px rgba(0,0,0,.3); pointer-events: none; }
 .tip[hidden] { display: none; }
+/* status.json notice (uploads down and such). Hides itself once an upload newer than "since" arrives */
+.sitenote { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 18px; padding: 12px 14px; border-radius: var(--radius); border: 1px solid rgba(240, 170, 60, .45); background: rgba(240, 170, 60, .1); color: var(--text); font-size: 14px; line-height: 1.45; }
+.sitenote[hidden] { display: none; }
+.sitenote svg { flex: none; width: 17px; height: 17px; margin-top: 1px; color: #f0aa3c; }
 .vodnote { display: flex; align-items: flex-start; gap: 10px; margin: 0 0 14px; padding: 12px 14px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); color: var(--muted); font-size: 14px; }
 .vodnote svg { flex: none; width: 16px; height: 16px; margin-top: 2px; color: var(--faint); }
 .vodnote b { color: var(--text); font-weight: 600; }
@@ -521,6 +525,7 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
       </button>
     </div>
   </header>
+  <div class="sitenote" id="siteNote" role="status" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9.5 17h-19z"/><path d="M12 10v4"/><path d="M12 17.5h.01"/></svg><span id="siteNoteText"></span></div>
 
   <div class="editbar" id="editbar" style="display:none">
     <span class="label">Edit mode</span>
@@ -821,6 +826,21 @@ function noteRateLimit(res) {
 
 const useWorker = () => !token && !!DATA_URL;
 
+// ---- site notice: status.json in this repo, {message, since, expires}.
+// Shows until any upload newer than "since" shows up (so it goes away on its
+// own once things work again), or until "expires". Delete or empty it to turn off.
+let newestUpload = 0, siteNote = null;
+async function loadSiteNote() {
+  try {
+    const res = await fetch("status.json", { cache: "no-cache" });
+    siteNote = res.ok ? await res.json() : null;
+  } catch { siteNote = null; }
+  const n = siteNote;
+  const on = !!(n && n.message && (!n.expires || nowS() < n.expires) && !(newestUpload > (n.since || 0)));
+  $("siteNote").hidden = !on;
+  if (on) $("siteNoteText").textContent = n.message;
+}
+
 async function load() {
   // A GitHub rate limit only matters when we can't use the Worker copy
   if (!useWorker() && Date.now() < pausedUntil) {
@@ -846,6 +866,7 @@ async function load() {
     }
     const out = [];
     files = {};
+    newestUpload = 0;
     hidden = { streamers: [], levels: [], sessions: [], runs: [], shown: [] };
     for (const file of Object.values(gist.files)) {
       if (!file.filename.endsWith(".json")) continue;
@@ -863,6 +884,7 @@ async function load() {
         data.streamer = (data.streamer || (cut > 0 ? file.filename.slice(0, cut) : "older uploads")).toLowerCase();
         files[file.filename] = data;
         out.push(data);
+        newestUpload = Math.max(newestUpload, Number(data.updated) || 0);
       } catch { }
     }
     for (const l of out) {
@@ -889,6 +911,7 @@ async function load() {
     groupCache = null;
     loaded = true;
     loadError = "";
+    loadSiteNote();
     render();
     if (!$("hiddenList").style.display) renderHidden();
     if (!$("shownList").style.display) renderShown();
