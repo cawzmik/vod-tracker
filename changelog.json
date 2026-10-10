@@ -3,6 +3,10 @@
     "date": "2026-10-09",
     "items": [
       {
+        "tag": "Site",
+        "text": "The streamer buttons on streamer pages wrap onto more lines instead of getting cut off. On phones you can swipe them, with a fade showing there's more"
+      },
+      {
         "tag": "Mod",
         "text": "v1.0.7: uploads every 3 minutes while playing instead of every minute, and waits after a failed upload, so lots of people playing at once doesn't stop uploads for everyone"
       },

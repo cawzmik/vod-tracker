@@ -115,6 +115,14 @@ a.btn { color: inherit; text-decoration: none; }
 /* Streamers */
 .streamers { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 14px; scrollbar-width: none; }
 .streamers::-webkit-scrollbar { display: none; }
+/* On computers the chips wrap onto more lines (a hidden sideways scroll can't be found with a mouse).
+   On phones they stay one swipeable row, with a fade on the edge that has more. */
+@media (min-width: 621px) { .streamers { flex-wrap: wrap; overflow: visible; } }
+@media (max-width: 620px) {
+  .streamers.more-right { -webkit-mask-image: linear-gradient(to right, #000 85%, transparent); mask-image: linear-gradient(to right, #000 85%, transparent); }
+  .streamers.more-left { -webkit-mask-image: linear-gradient(to left, #000 85%, transparent); mask-image: linear-gradient(to left, #000 85%, transparent); }
+  .streamers.more-left.more-right { -webkit-mask-image: linear-gradient(to right, transparent, #000 15%, #000 85%, transparent); mask-image: linear-gradient(to right, transparent, #000 15%, #000 85%, transparent); }
+}
 .streamer { display: flex; align-items: center; gap: 10px; padding: 6px 14px 6px 6px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; white-space: nowrap; font-weight: 500; box-shadow: var(--shadow); transition: border-color .15s, background .15s; }
 .streamer:hover { border-color: var(--border-strong); }
 .streamer.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-text); }
@@ -960,6 +968,15 @@ function avatarEl(name) {
   return img;
 }
 
+// Phone: fade whichever edge of the chip row has more to swipe to
+function streamerFades() {
+  const nav = $("streamers");
+  nav.classList.toggle("more-left", nav.scrollLeft > 4);
+  nav.classList.toggle("more-right", nav.scrollLeft + nav.clientWidth < nav.scrollWidth - 4);
+}
+$("streamers").addEventListener("scroll", streamerFades, { passive: true });
+window.addEventListener("resize", streamerFades);
+
 function renderStreamers(names) {
   const nav = $("streamers");
   nav.innerHTML = "";
@@ -976,6 +993,13 @@ function renderStreamers(names) {
     b.onclick = () => { if (name !== streamer) go(name); };
     nav.appendChild(b);
   }
+  // On a phone, bring the open streamer into view if it's off to the side
+  const on = nav.querySelector(".streamer.on");
+  if (on && nav.scrollWidth > nav.clientWidth) {
+    const left = on.offsetLeft - nav.offsetLeft;
+    if (left < nav.scrollLeft || left + on.offsetWidth > nav.scrollLeft + nav.clientWidth) nav.scrollLeft = Math.max(0, left - 16);
+  }
+  streamerFades();
 }
 
 // ---- main render
