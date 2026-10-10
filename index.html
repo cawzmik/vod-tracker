@@ -483,6 +483,74 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
   .hsearch kbd { display: none; }
 }
 @media (max-width: 1180px) { .status .when { display: none; } }
+
+/* ---- Phones: less scrolling, and menus that stay on screen ---- */
+@media (max-width: 620px) {
+  .topbar { position: relative; padding: 14px 0 12px; }
+  /* Support us: the menu spans the header instead of opening off the left edge */
+  .kofi-wrap { position: static; }
+  .kofi-menu { left: 0; right: 0; top: auto; margin-top: 6px; min-width: 0; }
+  .kofi-menu a { padding: 11px 12px; }
+
+  .home-hero { padding-top: 16px; }
+  .home-hero h1 { font-size: 26px; }
+  .home-hero .lead { font-size: 14px; }
+  .section { margin: 28px 0 10px; }
+
+  /* Streamers: two per row, smaller */
+  #homeGrid, #guestGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .scard { gap: 9px; padding: 9px 10px; min-width: 0; }
+  .scard > div { min-width: 0; }
+  .scard .avatar { width: 34px; height: 34px; font-size: 13px; flex: none; }
+  .scard .name { font-size: 14px; gap: 6px; }
+  .scard .name, .scard .meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .scard .meta { font-size: 12px; }
+  .scard .go { display: none; }
+  .scard .meta .nlv { display: none; }
+  /* "Playing now" becomes just the red dot */
+  .scard .live { font-size: 0; gap: 0; padding: 0; background: none; flex: none; }
+
+  /* Playing now / Best runs / Completions: three small tiles in one row */
+  .features { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 22px; }
+  .feat { padding: 11px 10px; min-width: 0; }
+  .feat p, .feat .bg { display: none; }
+  .feat .k { width: 28px; height: 28px; margin-bottom: 8px; }
+  .feat h3 { font-size: 13px; flex-wrap: wrap; gap: 4px; }
+
+  /* Top runs: swipe sideways instead of three tall cards */
+  .top3 { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 -14px; padding: 0 14px 4px; scrollbar-width: none; }
+  .top3::-webkit-scrollbar { display: none; }
+  .top3 > .tcard { flex: 0 0 86%; scroll-snap-align: center; }
+  .top3 > .notice { flex: 1 0 100%; }
+
+  /* Levels: two per row */
+  .lgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .lcard { padding: 10px 11px; gap: 2px; min-width: 0; }
+  .lcard .strip { margin: -10px -11px 8px; height: 40px; }
+  .lcard .top { flex-direction: column; align-items: flex-start; gap: 3px; }
+  .lcard .nm { font-size: 14px; max-width: 100%; }
+  .lcard .meta, .lcard .best { font-size: 12px; }
+  .lcard .meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Streamer and level pages */
+  .stats { gap: 8px; margin: 12px 0 14px; }
+  .stat { padding: 10px 12px; }
+  .stat span { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stat b { font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hero .banner.has-img { min-height: 0; }
+  .toolbar { gap: 8px; padding: 10px; }
+  .toolbar .seg { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .toolbar .seg::-webkit-scrollbar { display: none; }
+
+  /* Level board: both runs side by side under the name */
+  .board .brow { grid-template-columns: 20px 1fr 1fr auto; gap: 6px 10px; padding: 10px 12px; }
+  .board .who { grid-column: 2 / 4; grid-row: 1; }
+  .board .att { grid-column: 4; grid-row: 1; }
+  .board .cell.c0 { grid-column: 2; grid-row: 2; }
+  .board .cell.c1 { grid-column: 3 / 5; grid-row: 2; }
+  .board .cap { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .board .cell .bar { max-width: none; }
+}
 </style>
 </head>
 <body>
@@ -1109,9 +1177,11 @@ function renderHome() {
     text.innerHTML = '<div class="name"></div><div class="meta"></div>';
     text.querySelector(".name").textContent = dn(it.name);
     if (it.live) text.querySelector(".name").insertAdjacentHTML("beforeend", '<span class="live">Playing now</span>');
-    text.querySelector(".meta").textContent = it.guest
-      ? `${it.levels} ${it.levels === 1 ? "level" : "levels"} · removed in ${hoursLeft(it.name)}h`
-      : `${it.levels} ${it.levels === 1 ? "level" : "levels"} · played ${ago(nowS() - it.last)}`;
+    // The level count hides on phones so the time fits
+    const meta = text.querySelector(".meta");
+    meta.innerHTML = '<span class="nlv"></span><span class="when"></span>';
+    meta.firstChild.textContent = `${it.levels} ${it.levels === 1 ? "level" : "levels"} · `;
+    meta.lastChild.textContent = it.guest ? `removed in ${hoursLeft(it.name)}h` : `played ${ago(nowS() - it.last)}`;
     b.appendChild(text);
     b.insertAdjacentHTML("beforeend", '<svg class="go" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>');
     b.onclick = () => go(it.name);

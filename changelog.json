@@ -1,5 +1,22 @@
 [
   {
+    "date": "2026-10-10",
+    "items": [
+      {
+        "tag": "Site",
+        "text": "Phones: the home page is about half as long. Streamers and levels show two per row, the three shortcut cards fit on one row, and Top runs can be swiped sideways"
+      },
+      {
+        "tag": "Site",
+        "text": "Phones: the Support us menu opens on screen instead of off the left edge, so the Ko-fi links work"
+      },
+      {
+        "tag": "Site",
+        "text": "Phones: smaller stat boxes, and the level page shows each streamer's two best runs side by side"
+      }
+    ]
+  },
+  {
     "date": "2026-10-09",
     "items": [
       {
