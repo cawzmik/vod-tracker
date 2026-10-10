@@ -1,0 +1,30 @@
+<!doctype html>
+<!-- gdrewind.live/brook (isbro0k). Only here so link previews show the name. Made from DISPLAY_NAMES in index.html. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brook · GD Rewind</title>
+<meta name="description" content="Brook&#x27;s Geometry Dash runs on stream, each linked to the moment in the Twitch VOD.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GD Rewind">
+<meta property="og:title" content="Brook · GD Rewind">
+<meta property="og:description" content="Brook&#x27;s Geometry Dash runs on stream, each linked to the moment in the Twitch VOD.">
+<meta property="og:url" content="https://gdrewind.live/brook">
+<meta property="og:image" content="https://gdrewind.live/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Brook · GD Rewind">
+<meta name="twitter:description" content="Brook&#x27;s Geometry Dash runs on stream, each linked to the moment in the Twitch VOD.">
+<meta name="twitter:image" content="https://gdrewind.live/og.png">
+<style>html,body{background:#0d0d10;margin:0}</style>
+<script>
+  // Clean links (gdrewind.live/taiago, /level/...) land here. Load the real page in place.
+  fetch("/index.html", { cache: "no-cache" }).then(r => { if (!r.ok) throw 0; return r.text(); })
+    .then(h => { document.open(); document.write(h); document.close(); })
+    .catch(() => location.replace("/"));
+</script>
+</head>
+<body></body>
+</html>

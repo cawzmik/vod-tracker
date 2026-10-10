@@ -563,7 +563,7 @@ input[type=checkbox] { width: 17px; height: 17px; accent-color: var(--accent); c
 <div class="wrap">
   <header class="topbar">
     <div class="brand-wrap">
-    <a class="brand" href="./" id="homeLink"><svg class="logo" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="58 0 48 48"><title>Hainesnoids was here</title><defs><linearGradient id="gdr" x1="81.82" y1="43" x2="81.82" y2="5" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#8b80ff"/><stop offset="1" stop-color="#8b80ff" stop-opacity=".8"/></linearGradient></defs><path fill="url(#gdr)" d="M 81.423828,5.0117188 C 78.35723,5.1023105 75.288064,5.9332797 72.5,7.5429688 65.065161,11.835475 61.424519,20.621578 63.646484,28.914062 65.868449,37.206547 73.414989,42.996095 82,42.996094 c 8.584391,0 16.128983,-5.788557 18.35156,-14.080078 0.47436,-1.746445 0.4473,-3.752165 -0.568357,-5.398438 -1.017842,-1.649821 -2.726504,-2.566607 -4.498047,-3.03125 C 92.755454,19.822835 89.74438,19.816642 86,20.279297 V 17.072266 L 74,24 86,30.927734 v -4.566406 c 3.7612,-0.467757 6.452026,-0.414333 7.763672,-0.07031 0.661728,0.173559 0.870413,0.342841 0.912109,0.380859 0.0074,0.06401 0.0018,0.246972 -0.115234,0.675781 l -0.0039,0.01367 C 93.030031,33.058714 87.898371,36.996094 82,36.996094 76.101633,36.996095 70.969969,33.058714 69.443359,27.361328 67.916748,21.66394 70.391861,15.687467 75.5,12.738281 80.608138,9.7890979 87.020629,10.63391 91.191406,14.804688 L 95.435547,10.5625 C 92.400286,7.5272397 88.524104,5.6986274 84.478516,5.1660156 83.467119,5.0328627 82.446027,4.9815215 81.423828,5.0117188 Z M 94.666016,26.642578 h 0.002 v 0.002 h 0.002 v 0.002 c 0.0013,0.0035 0.0026,0.01083 0.0039,0.01953 -0.0034,-0.006 -0.0048,-0.01374 -0.0059,-0.01758 l -0.002,-0.002 v -0.002 z"/></svg><span class="brand-name">GD Rewind<span class="brand-live"><span>LIVE</span></span></span></a>
+    <a class="brand" href="/" id="homeLink"><svg class="logo" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="58 0 48 48"><title>Hainesnoids was here</title><defs><linearGradient id="gdr" x1="81.82" y1="43" x2="81.82" y2="5" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#8b80ff"/><stop offset="1" stop-color="#8b80ff" stop-opacity=".8"/></linearGradient></defs><path fill="url(#gdr)" d="M 81.423828,5.0117188 C 78.35723,5.1023105 75.288064,5.9332797 72.5,7.5429688 65.065161,11.835475 61.424519,20.621578 63.646484,28.914062 65.868449,37.206547 73.414989,42.996095 82,42.996094 c 8.584391,0 16.128983,-5.788557 18.35156,-14.080078 0.47436,-1.746445 0.4473,-3.752165 -0.568357,-5.398438 -1.017842,-1.649821 -2.726504,-2.566607 -4.498047,-3.03125 C 92.755454,19.822835 89.74438,19.816642 86,20.279297 V 17.072266 L 74,24 86,30.927734 v -4.566406 c 3.7612,-0.467757 6.452026,-0.414333 7.763672,-0.07031 0.661728,0.173559 0.870413,0.342841 0.912109,0.380859 0.0074,0.06401 0.0018,0.246972 -0.115234,0.675781 l -0.0039,0.01367 C 93.030031,33.058714 87.898371,36.996094 82,36.996094 76.101633,36.996095 70.969969,33.058714 69.443359,27.361328 67.916748,21.66394 70.391861,15.687467 75.5,12.738281 80.608138,9.7890979 87.020629,10.63391 91.191406,14.804688 L 95.435547,10.5625 C 92.400286,7.5272397 88.524104,5.6986274 84.478516,5.1660156 83.467119,5.0328627 82.446027,4.9815215 81.423828,5.0117188 Z M 94.666016,26.642578 h 0.002 v 0.002 h 0.002 v 0.002 c 0.0013,0.0035 0.0026,0.01083 0.0039,0.01953 -0.0034,-0.006 -0.0048,-0.01374 -0.0059,-0.01758 l -0.002,-0.002 v -0.002 z"/></svg><span class="brand-name">GD Rewind<span class="brand-live"><span>LIVE</span></span></span></a>
     <span class="about" tabindex="0" role="button" aria-label="What is GD Rewind?">?<span class="about-tip" role="tooltip">A death tracker for Geometry Dash streamers. Every attempt on a level is saved with the percent it started and ended at, like 34%-71%, and linked to the moment it started in the streamer's Twitch VOD.</span></span>
     </div>
     <div class="search hsearch" id="topSearchWrap">
@@ -829,8 +829,7 @@ let lastFetch = 0;
 let loaded = false;      // got data from GitHub at least once
 let pausedUntil = 0;     // GitHub asked us to wait until this time (ms)
 let loadError = "";
-let streamer = (params.get("streamer") || "").toLowerCase() || null;
-let levelPage = streamer ? null : (params.get("level") || "").toLowerCase().trim() || null;
+let streamer = null, levelPage = null; // set from the URL once DISPLAY_NAMES exists (readUrl)
 let levelKey = null, sessionId = null;
 // sessionId can also be ALL: every uploaded session of the level together
 const ALL = "all";
@@ -845,8 +844,9 @@ let editMode = false;
 const selected = new Set();
 let D = null; // the session being shown
 
-// Names shown on the site. Uploads, links (?streamer=) and edit mode keep the
-// Twitch login; this only changes what people read. Anyone not listed gets a
+// Names shown on the site. Uploads, hidden.json and edit mode keep the Twitch
+// login; this changes what people read and the clean link (/brian-cheese). A new
+// name here also needs its <slug>.html loader file, so link previews show it. Anyone not listed gets a
 // capital first letter (doggie shows as Doggie).
 const DISPLAY_NAMES = {
   technicaljl: "Technical",
@@ -859,6 +859,33 @@ const DISPLAY_NAMES = {
   taiago7: "Taiago",
 };
 const dn = login => !login ? login : DISPLAY_NAMES[login] || login.charAt(0).toUpperCase() + login.slice(1);
+
+// Clean links: gdrewind.live/taiago for a streamer (their shown name, or the
+// login for anyone not in DISPLAY_NAMES) and gdrewind.live/level/sweeping-demon-ii
+// for a level page. GitHub Pages sends those paths to 404.html (or <name>.html),
+// which loads this page. Old ?streamer= and ?level= links still work.
+const slugify = s => String(s || "").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+const streamerSlug = login => DISPLAY_NAMES[login] ? slugify(DISPLAY_NAMES[login]) : login;
+const loginFromSlug = s => {
+  s = s.toLowerCase();
+  for (const [login, name] of Object.entries(DISPLAY_NAMES)) if (slugify(name) === s) return login;
+  return s;
+};
+const levelSlug = key => slugify(key) || encodeURIComponent(key);
+function readUrl() {
+  const q = new URLSearchParams(location.search);
+  let s = (q.get("streamer") || "").toLowerCase() || null;
+  let l = s ? null : (q.get("level") || "").toLowerCase().trim() || null;
+  if (!s && !l) {
+    let parts = [];
+    try { parts = location.pathname.split("/").filter(Boolean).map(decodeURIComponent); } catch { }
+    if (parts[0] === "index.html") parts = [];
+    if (parts[0] === "level" && parts[1]) l = parts.slice(1).join("/").toLowerCase().trim();
+    else if (parts.length === 1 && !parts[0].includes(".")) s = loginFromSlug(parts[0]);
+  }
+  return { s, l };
+}
+({ s: streamer, l: levelPage } = readUrl());
 
 // Level names fixed on the site, for levels a streamer keeps renaming. Any
 // level whose name starts with the pattern shows with the fixed name, so all
@@ -928,7 +955,7 @@ const useWorker = () => !token && !!DATA_URL;
 let newestUpload = 0, siteNote = null;
 async function loadSiteNote() {
   try {
-    const res = await fetch("status.json", { cache: "no-cache" });
+    const res = await fetch("/status.json", { cache: "no-cache" });
     siteNote = res.ok ? await res.json() : null;
   } catch { siteNote = null; }
   const n = siteNote;
@@ -1098,15 +1125,16 @@ function renderStreamers(names) {
 }
 
 // ---- main render
-// ---- navigation. ?streamer=name opens straight to that person, no streamer is the home page.
+// ---- navigation. /<name> opens straight to that person, / is the home page.
 function pageUrl(name = streamer, lvl = levelPage) {
   const p = new URLSearchParams();
   if (params.get("gist")) p.set("gist", params.get("gist"));
-  if (name) p.set("streamer", name);
-  else if (lvl) p.set("level", lvl);
   const q = p.toString();
-  return location.origin + location.pathname + (q ? "?" + q : "");
+  const path = name ? "/" + encodeURIComponent(streamerSlug(name)) : lvl ? "/level/" + levelSlug(lvl) : "/";
+  return location.origin + path + (q ? "?" + q : "");
 }
+// Old ?streamer= / ?level= links, and /taiago/ with a slash, show the clean link
+if (location.protocol.startsWith("http") && (streamer || levelPage) && location.href !== pageUrl()) history.replaceState(null, "", pageUrl());
 
 function go(name, key = null, sid = null) {
   streamer = name || null; levelKey = key; sessionId = sid; startFilter = "all"; levelPage = null;
@@ -1126,9 +1154,7 @@ function goLevel(key) {
 }
 
 window.addEventListener("popstate", () => {
-  const q = new URLSearchParams(location.search);
-  streamer = (q.get("streamer") || "").toLowerCase() || null;
-  levelPage = streamer ? null : (q.get("level") || "").toLowerCase().trim() || null;
+  ({ s: streamer, l: levelPage } = readUrl());
   levelKey = null; sessionId = null; startFilter = "all";
   render();
 });
@@ -1748,11 +1774,12 @@ function renderLevel() {
     return;
   }
   const groups = levelGroups();
-  const g = groups.get(levelPage) || findGroups(levelPage)[0];
+  const g = groups.get(levelPage) || [...groups.values()].find(x => levelSlug(x.key) === levelPage) || findGroups(levelPage.replace(/-/g, " "))[0];
+  if (g) levelPage = g.key;
   if (!g) {
     $("levelView").style.display = "none";
     document.title = "GD Rewind";
-    showNotice(`Nobody has played "${levelPage}" with the mod yet. Click GD Rewind to go back home.`);
+    showNotice(`Nobody has played "${levelPage.replace(/-/g, " ")}" with the mod yet. Click GD Rewind to go back home.`);
     $("main").style.display = "none";
     return;
   }
@@ -2308,7 +2335,7 @@ const newsSeen = () => { try { return localStorage.getItem(NEWS_KEY) || ""; } ca
 
 async function loadNews() {
   try {
-    const res = await fetch("changelog.json", { cache: "no-cache" });
+    const res = await fetch("/changelog.json", { cache: "no-cache" });
     if (!res.ok) return;
     const list = await res.json();
     news = (Array.isArray(list) ? list : [])
